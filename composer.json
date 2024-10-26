@@ -1,0 +1,15 @@
+{
+    "name": "qfranklin/vue",
+    "autoload": {
+        "psr-4": {
+            "Qfranklin\\Vue\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Quentin Franklin",
+            "email": "qfranklin@gmail.com"
+        }
+    ],
+    "require": {}
+}

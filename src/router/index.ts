@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AboutPage from '../views/AboutPage.vue'
+import LoginPage from '../views/LoginPage.vue'
+import RegisterPage from '../views/RegisterPage.vue'
 
 const routes = [
   {
@@ -10,8 +12,12 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    // Lazy load the login component
-    component: () => import('../views/LoginPage.vue')
+    component: LoginPage
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: RegisterPage
   }
 ]
 

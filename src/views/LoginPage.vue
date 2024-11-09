@@ -4,12 +4,12 @@
     <h1>Login Page</h1>
     <form @submit.prevent="handleLogin">
       <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" v-model="username">
+        <label for="name">Name:</label>
+        <input type="text" id="name" v-model="name" required>
       </div>
       <div>
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" v-model="password">
+        <input type="password" id="password" v-model="password" required>
       </div>
       <button type="submit">Login</button>
     </form>
@@ -23,13 +23,13 @@ import axios from 'axios'
 export default defineComponent({
   name: 'LoginPage',
   setup() {
-    const username = ref('')
+    const name = ref('')
     const password = ref('')
 
     const handleLogin = async () => {
       try {
         const response = await axios.post('/api/login', {
-          username: username.value,
+          name: name.value,
           password: password.value
         })
         console.log('Login successful:', response.data)
@@ -41,7 +41,7 @@ export default defineComponent({
     }
 
     return {
-      username,
+      name,
       password,
       handleLogin
     }

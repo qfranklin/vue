@@ -3,8 +3,8 @@
     <h1>Register Page</h1>
     <form @submit.prevent="handleRegister">
       <div>
-        <label for="username">Username:</label>
-        <input type="text" id="username" v-model="username" required>
+        <label for="name">Name:</label>
+        <input type="text" id="name" v-model="name" required>
       </div>
       <div>
         <label for="password">Password:</label>
@@ -16,6 +16,7 @@
       </div>
       <button type="submit">Register</button>
     </form>
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
   </div>
 </template>
 
@@ -26,14 +27,15 @@ import axios from 'axios'
 export default defineComponent({
   name: 'RegisterPage',
   setup() {
-    const username = ref('')
+    const name = ref('')
     const password = ref('')
     const email = ref('')
+    const errorMessage = ref('')
 
     const handleRegister = async () => {
       try {
         const response = await axios.post('/api/register', {
-          username: username.value,
+          name: name.value,
           password: password.value,
           email: email.value
         })
@@ -41,14 +43,15 @@ export default defineComponent({
         // Handle successful registration (e.g., redirect to a different page)
       } catch (error) {
         console.error('Registration failed:', error)
-        // Handle registration error
+        errorMessage.value = 'Registration failed. Please try again.'
       }
     }
 
     return {
-      username,
+      name,
       password,
       email,
+      errorMessage,
       handleRegister
     }
   }
@@ -73,5 +76,11 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+}
+
+.error-message {
+  color: red;
+  margin-top: 1rem;
+  text-align: center;
 }
 </style>

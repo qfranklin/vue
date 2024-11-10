@@ -50,12 +50,12 @@ export default defineComponent({
 
     const sendTestRequest = async () => {
       try {
-        const response = await axios.get('/api/test')
-        console.log('Test request successful:', response.data)
+        const response = await axios.get('http://localhost:8082/api/test'); // Direct to backend
+        console.log('Test request successful:', response.data);
       } catch (error) {
-        console.error('Test request failed:', error)
+        console.error('Test request failed:', error);
       }
-    }
+    };
 
     return {
       name,

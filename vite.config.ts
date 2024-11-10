@@ -1,8 +1,8 @@
+// vite.config.js
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -13,13 +13,13 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8082', // your Laravel backend URL
+        target: 'http://localhost:8082',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), // Ensure '/api' prefix is handled
+        rewrite: (path) => path.replace(/^\/api/, '')
       },
     },
-    port: 8080, // Set the Vue frontend to run on port 8080
   },
 })

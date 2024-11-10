@@ -11,13 +11,16 @@
         <input type="password" id="password" v-model="password" required>
       </div>
       <div>
+        <label for="password_confirmation">Confirm Password:</label>
+        <input type="password" id="password_confirmation" v-model="passwordConfirmation" required>
+      </div>
+      <div>
         <label for="email">Email:</label>
         <input type="email" id="email" v-model="email" required>
       </div>
       <button type="submit">Register</button>
     </form>
     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-    <button @click="sendTestRequest">Send Test Request</button>
   </div>
 </template>
 
@@ -30,6 +33,7 @@ export default defineComponent({
   setup() {
     const name = ref('')
     const password = ref('')
+    const passwordConfirmation = ref('')
     const email = ref('')
     const errorMessage = ref('')
 
@@ -38,6 +42,7 @@ export default defineComponent({
         const response = await axios.post('/api/register', {
           name: name.value,
           password: password.value,
+          password_confirmation: passwordConfirmation.value,
           email: email.value
         })
         console.log('Registration successful:', response.data)
@@ -48,22 +53,13 @@ export default defineComponent({
       }
     }
 
-    const sendTestRequest = async () => {
-      try {
-        const response = await axios.get('http://localhost:8082/api/test'); // Direct to backend
-        console.log('Test request successful:', response.data);
-      } catch (error) {
-        console.error('Test request failed:', error);
-      }
-    };
-
     return {
       name,
       password,
+      passwordConfirmation,
       email,
       errorMessage,
-      handleRegister,
-      sendTestRequest
+      handleRegister
     }
   }
 })

@@ -21,6 +21,7 @@
       <button type="submit">Register</button>
     </form>
     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
   </div>
 </template>
 
@@ -36,6 +37,7 @@ export default defineComponent({
     const passwordConfirmation = ref('')
     const email = ref('')
     const errorMessage = ref('')
+    const successMessage = ref('')
 
     const handleRegister = async () => {
       try {
@@ -46,10 +48,17 @@ export default defineComponent({
           email: email.value
         })
         console.log('Registration successful:', response.data)
-        // Handle successful registration (e.g., redirect to a different page)
+        successMessage.value = 'Registration successful!'
+        errorMessage.value = ''
+        // Clear form fields
+        name.value = ''
+        password.value = ''
+        passwordConfirmation.value = ''
+        email.value = ''
       } catch (error) {
         console.error('Registration failed:', error)
         errorMessage.value = 'Registration failed. Please try again.'
+        successMessage.value = ''
       }
     }
 
@@ -59,6 +68,7 @@ export default defineComponent({
       passwordConfirmation,
       email,
       errorMessage,
+      successMessage,
       handleRegister
     }
   }
@@ -87,6 +97,12 @@ button {
 
 .error-message {
   color: red;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.success-message {
+  color: green;
   margin-top: 1rem;
   text-align: center;
 }

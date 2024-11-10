@@ -17,6 +17,7 @@
       <button type="submit">Register</button>
     </form>
     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <button @click="sendTestRequest">Send Test Request</button>
   </div>
 </template>
 
@@ -47,12 +48,22 @@ export default defineComponent({
       }
     }
 
+    const sendTestRequest = async () => {
+      try {
+        const response = await axios.get('/api/test')
+        console.log('Test request successful:', response.data)
+      } catch (error) {
+        console.error('Test request failed:', error)
+      }
+    }
+
     return {
       name,
       password,
       email,
       errorMessage,
-      handleRegister
+      handleRegister,
+      sendTestRequest
     }
   }
 })

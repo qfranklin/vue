@@ -17,7 +17,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8082', // your Laravel backend URL
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), // Optional: Remove '/api' prefix
+        rewrite: (path) => path.replace(/^\/api/, ''), // Ensure '/api' prefix is handled
       },
     },
     port: 8080, // Set the Vue frontend to run on port 8080

@@ -40,7 +40,7 @@ export default defineComponent({
         })
         console.log('Login successful:', response.data)
         const { token, is_admin } = response.data
-        userStore.login(email.value, token)
+        userStore.login(email.value, token, is_admin)
         if (is_admin) {
           router.push('/admin')
         } else {

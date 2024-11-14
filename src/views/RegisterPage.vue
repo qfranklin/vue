@@ -1,5 +1,6 @@
 <template>
   <div>
+    <HeaderComponent />
     <h1>Register Page</h1>
     <form @submit.prevent="handleRegister">
       <div>
@@ -28,9 +29,13 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
+import HeaderComponent from '@/components/HeaderComponent.vue'
 
 export default defineComponent({
   name: 'RegisterPage',
+  components: {
+    HeaderComponent
+  },
   setup() {
     const name = ref('')
     const password = ref('')

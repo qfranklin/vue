@@ -2,19 +2,21 @@
 <template>
   <div>
     <HeaderComponent />
-    <h1>Login Page</h1>
-    <form @submit.prevent="handleLogin">
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required>
-      </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required>
-      </div>
-      <button type="submit">Login</button>
-    </form>
-    <p v-if="errorMessage">{{ errorMessage }}</p>
+    <div class="main-content">
+      <h1>Login Page</h1>
+      <form @submit.prevent="handleLogin">
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="email" v-model="email" required>
+        </div>
+        <div>
+          <label for="password">Password:</label>
+          <input type="password" id="password" v-model="password" required>
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      <p v-if="errorMessage">{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
@@ -68,6 +70,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.main-content {
+  padding-top: 4rem; /* Adjust this value based on the height of your header */
+}
 form {
   display: flex;
   flex-direction: column;

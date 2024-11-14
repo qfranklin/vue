@@ -4,8 +4,8 @@
     <h1>Login Page</h1>
     <form @submit.prevent="handleLogin">
       <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name" v-model="name" required>
+        <label for="email">Email:</label>
+        <input type="email" id="email" v-model="email" required>
       </div>
       <div>
         <label for="password">Password:</label>
@@ -13,36 +13,49 @@
       </div>
       <button type="submit">Login</button>
     </form>
+    <p v-if="errorMessage">{{ errorMessage }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'LoginPage',
   setup() {
-    const name = ref('')
+    const email = ref('')
     const password = ref('')
+    const errorMessage = ref('')
+    const router = useRouter()
 
     const handleLogin = async () => {
       try {
         const response = await axios.post('/api/login', {
-          name: name.value,
+          email: email.value,
           password: password.value
         })
         console.log('Login successful:', response.data)
-        // Handle successful login (e.g., redirect to a different page)
+        const { token, is_admin } = response.data
+        // Store the token (e.g., in localStorage)
+        localStorage.setItem('auth_token', token)
+        // Redirect based on admin status
+        if (is_admin) {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
       } catch (error) {
         console.error('Login failed:', error)
-        // Handle login error
+        errorMessage.value = 'Login failed. Please try again.'
       }
     }
 
     return {
-      name,
+      email,
       password,
+      errorMessage,
       handleLogin
     }
   }

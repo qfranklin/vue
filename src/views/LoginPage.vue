@@ -21,6 +21,7 @@
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'LoginPage',
@@ -29,6 +30,7 @@ export default defineComponent({
     const password = ref('')
     const errorMessage = ref('')
     const router = useRouter()
+    const userStore = useUserStore()
 
     const handleLogin = async () => {
       try {
@@ -38,9 +40,7 @@ export default defineComponent({
         })
         console.log('Login successful:', response.data)
         const { token, is_admin } = response.data
-        // Store the token (e.g., in localStorage)
-        localStorage.setItem('auth_token', token)
-        // Redirect based on admin status
+        userStore.login(email.value, token)
         if (is_admin) {
           router.push('/admin')
         } else {

@@ -1,6 +1,10 @@
 <template>
   <header class="header">
-    <nav>
+    <nav class="left-nav">
+      <router-link to="/">Home</router-link>
+      <router-link v-if="isAdmin" to="/admin">Admin</router-link>
+    </nav>
+    <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
       <router-link v-if="!isLoggedIn" to="/register">Register</router-link>
       <span v-if="isLoggedIn" class="user-email">{{ userEmail }}</span>
@@ -11,22 +15,29 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'HeaderComponent',
   setup() {
     const userStore = useUserStore()
+    const router = useRouter()
     const isLoggedIn = computed(() => userStore.isLoggedIn)
     const userEmail = computed(() => userStore.email)
+    const isAdmin = computed(() => userStore.isAdmin)
 
     const logout = () => {
       userStore.logout()
+      if (router.currentRoute.value.path === '/admin') {
+        router.push('/login')
+      }
     }
 
     return {
       isLoggedIn,
       userEmail,
+      isAdmin,
       logout
     }
   }
@@ -46,21 +57,23 @@ export default defineComponent({
   left: 0;
   z-index: 1000;
 }
-
-nav {
+.left-nav {
+  display: flex;
+  gap: 1rem;
+}
+.right-nav {
+  display: flex;
+  gap: 1rem;
   margin-left: auto;
 }
-
 nav a {
   text-decoration: none;
   color: #007bff;
 }
-
 .user-email {
   font-size: 0.8rem;
   margin-right: 1rem;
 }
-
 button {
   background: none;
   border: none;

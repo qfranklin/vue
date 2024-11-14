@@ -1,6 +1,7 @@
 <!-- src/views/Login.vue -->
 <template>
   <div>
+    <HeaderComponent />
     <h1>Login Page</h1>
     <form @submit.prevent="handleLogin">
       <div>
@@ -21,10 +22,14 @@
 import { defineComponent, ref } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+import HeaderComponent from '@/components/HeaderComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'LoginPage',
+  components: {
+    HeaderComponent
+  },
   setup() {
     const email = ref('')
     const password = ref('')
@@ -40,7 +45,7 @@ export default defineComponent({
         })
         console.log('Login successful:', response.data)
         const { token, is_admin } = response.data
-        userStore.login(email.value, token)
+        userStore.login(email.value, token, is_admin)
         if (is_admin) {
           router.push('/admin')
         } else {

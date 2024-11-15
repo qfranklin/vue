@@ -6,6 +6,12 @@
         <img src="/profile.jpg" alt="Profile Picture" class="profile-image">
         <div class="description">
           <p>Welcome to our website! This platform allows customers to register their glass blown pendants. We take pride in our unique and handcrafted products. Register your product to make it only accessible to you.</p>
+          <p v-if="isLoggedIn">
+            <strong>Numerology:</strong> {{ numerology }}
+          </p>
+          <p v-if="isLoggedIn">
+            <strong>Astrology:</strong> {{ astrology }}
+          </p>
         </div>
       </section>
     </main>
@@ -13,13 +19,25 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 import HeaderComponent from '@/components/HeaderComponent.vue'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AboutPage',
   components: {
     HeaderComponent
+  },
+  setup() {
+    const userStore = useUserStore()
+    const isLoggedIn = computed(() => userStore.isLoggedIn)
+    const numerology = computed(() => userStore.numerology)
+    const astrology = computed(() => userStore.astrology)
+    return {
+      isLoggedIn,
+      numerology,
+      astrology
+    }
   }
 })
 </script>

@@ -46,13 +46,9 @@ export default defineComponent({
           password: password.value
         })
         console.log('Login successful:', response.data)
-        const { token, is_admin } = response.data
-        userStore.login(email.value, token, is_admin)
-        if (is_admin) {
-          router.push('/admin')
-        } else {
-          router.push('/')
-        }
+        const { token, is_admin, birthdate } = response.data
+        userStore.login(email.value, token, is_admin, birthdate)
+        router.push('/')
       } catch (error) {
         console.error('Login failed:', error)
         errorMessage.value = 'Login failed. Please try again.'

@@ -20,6 +20,10 @@
           <label for="email">Email:</label>
           <input type="email" id="email" v-model="email" required>
         </div>
+        <div>
+          <label for="birthdate">Birthdate:</label>
+          <input type="date" id="birthdate" v-model="birthdate" required>
+        </div>
         <button type="submit">Register</button>
       </form>
       <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
@@ -43,6 +47,7 @@ export default defineComponent({
     const password = ref('')
     const passwordConfirmation = ref('')
     const email = ref('')
+    const birthdate = ref('')
     const errorMessage = ref('')
     const successMessage = ref('')
 
@@ -52,7 +57,8 @@ export default defineComponent({
           name: name.value,
           password: password.value,
           password_confirmation: passwordConfirmation.value,
-          email: email.value
+          email: email.value,
+          birthdate: birthdate.value
         })
         console.log('Registration successful:', response.data)
         successMessage.value = 'Registration successful!'
@@ -62,6 +68,7 @@ export default defineComponent({
         password.value = ''
         passwordConfirmation.value = ''
         email.value = ''
+        birthdate.value = ''
       } catch (error) {
         console.error('Registration failed:', error)
         errorMessage.value = 'Registration failed. Please try again.'
@@ -74,6 +81,7 @@ export default defineComponent({
       password,
       passwordConfirmation,
       email,
+      birthdate,
       errorMessage,
       successMessage,
       handleRegister

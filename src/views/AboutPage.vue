@@ -21,8 +21,26 @@
             <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
             <br>
+            <div class="tooltip">
+              <strong>Life Path Number:</strong> {{ lifePathNumber }}
+              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
+              <span v-if="showTooltip === 'lifePath'" class="tooltiptext">{{ lifePathTooltip }}</span>
+            </div>
+            <br>
+            <div class="tooltip">
+              <strong>Universal Day Number:</strong> {{ universalDayNumber }}
+              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('universalDay')">?</a>
+              <span v-if="showTooltip === 'universalDay'" class="tooltiptext">{{ universalDayTooltip }}</span>
+            </div>
+            <br>
+            <div class="tooltip">
+              <strong>Personal Day Number:</strong> {{ personalDayNumber }}
+              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('personalDay')">?</a>
+              <span v-if="showTooltip === 'personalDay'" class="tooltiptext">{{ personalDayTooltip }}</span>
+            </div>
+            <br>
             <div v-if="loading" class="loading-spinner">Loading...</div>
-            <div v-else :class="predictionClass">
+            <div v-else >
               <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
             </div>
           </div>
@@ -57,6 +75,10 @@ export default defineComponent({
     const loading = ref(true)
     const dailyPrediction = ref('')
     const dailyPredictionMessage = ref('')
+    const lifePathNumber = ref(null)
+    const universalDayNumber = ref(null)
+    const personalDayNumber = ref(null)
+    const showTooltip = ref('')
 
     watch(() => userStore.birthday, (newBirthday) => {
       editableBirthday.value = newBirthday.split('T')[0]
@@ -114,6 +136,9 @@ export default defineComponent({
         userStore.setBirthday(response.data.birthday)
         dailyPrediction.value = response.data.numerology.daily_prediction
         dailyPredictionMessage.value = `Today is a ${dailyPrediction.value} day for you.`
+        lifePathNumber.value = response.data.numerology.life_path_number
+        universalDayNumber.value = response.data.numerology.universal_day_number
+        personalDayNumber.value = response.data.numerology.personal_day_number
       } catch (error) {
         console.error('Failed to fetch user data:', error)
       } finally {
@@ -129,15 +154,38 @@ export default defineComponent({
       }
     })
 
-    const numerology = computed(() => userStore.numerology)
-    const astrology = computed(() => userStore.astrology)
+    const toggleTooltip = (tooltip: string) => {
+      showTooltip.value = showTooltip.value === tooltip ? '' : tooltip
+    }
 
-    const predictionClass = computed(() => {
-      return {
-        'good-day': dailyPrediction.value === 'good',
-        'bad-day': dailyPrediction.value === 'bad',
-        'neutral-day': dailyPrediction.value === 'neutral'
-      }
+    const lifePathTooltip = computed(() => {
+      const date = new Date(userStore.birthday)
+      const year = date.getUTCFullYear().toString().split('').join(' + ')
+      const month = (date.getUTCMonth() + 1).toString().split('').join(' + ')
+      const day = date.getUTCDate().toString().split('').join(' + ')
+      const sum = year.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
+                  month.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
+                  day.split(' + ').reduce((acc, num) => acc + parseInt(num), 0)
+      const reducedSum = lifePathNumber.value
+      return `Calculated by summing the digits of your birth date (${year} + ${month} + ${day} = ${sum}) and reducing to a single digit (${reducedSum}).`
+    })
+
+    const universalDayTooltip = computed(() => {
+      const date = new Date()
+      const year = date.getUTCFullYear().toString().split('').join(' + ')
+      const month = (date.getUTCMonth() + 1).toString().split('').join(' + ')
+      const day = date.getUTCDate().toString().split('').join(' + ')
+      const sum = year.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
+                  month.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
+                  day.split(' + ').reduce((acc, num) => acc + parseInt(num), 0)
+      const reducedSum = universalDayNumber.value
+      return `Calculated by summing the digits of the current date (${year} + ${month} + ${day} = ${sum}) and reducing to a single digit (${reducedSum}).`
+    })
+
+    const personalDayTooltip = computed(() => {
+      const lifePath = lifePathNumber.value ?? 0;
+      const universalDay = universalDayNumber.value ?? 0;
+      return `Calculated by adding your Life Path Number (${lifePath}) to the Universal Day Number (${universalDay}) and reducing to a single digit (${personalDayNumber.value}).`
     })
 
     return {
@@ -149,13 +197,18 @@ export default defineComponent({
       errorMessage,
       loading,
       dailyPredictionMessage,
+      lifePathNumber,
+      universalDayNumber,
+      personalDayNumber,
       startEdit,
       cancelEdit,
       submitEdit,
       formattedBirthday,
-      numerology,
-      astrology,
-      predictionClass
+      showTooltip,
+      toggleTooltip,
+      lifePathTooltip,
+      universalDayTooltip,
+      personalDayTooltip
     }
   }
 })
@@ -221,19 +274,39 @@ export default defineComponent({
 .neutral-day {
   color: gray;
 }
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-  }
-  .profile-image {
-    margin-right: 2rem;
-  }
-  .description {
-    text-align: left;
-  }
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltip-icon {
+  margin-left: 5px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: bold;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 220px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Position the tooltip above the text */
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip .tooltip-icon:focus + .tooltiptext,
+.tooltip .tooltip-icon:active + .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 </style>

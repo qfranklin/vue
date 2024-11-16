@@ -5,9 +5,7 @@ export const useUserStore = defineStore('user', {
     email: '',
     token: '',
     isAdmin: false,
-    birthday: '',
-    numerology: '',
-    astrology: ''
+    birthday: ''
   }),
   getters: {
     isLoggedIn: (state) => !!state.token
@@ -26,8 +24,6 @@ export const useUserStore = defineStore('user', {
       this.token = ''
       this.isAdmin = false
       this.birthday = ''
-      this.numerology = ''
-      this.astrology = ''
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user_email')
       localStorage.removeItem('is_admin')
@@ -44,24 +40,12 @@ export const useUserStore = defineStore('user', {
         this.isAdmin = isAdmin
         if (birthday) {
           this.birthday = birthday
-          this.calculateNumerology()
-          this.calculateAstrology()
         }
       }
     },
     setBirthday(birthday: string) {
       this.birthday = birthday
-      this.calculateNumerology()
-      this.calculateAstrology()
       localStorage.setItem('birthday', birthday)
-    },
-    calculateNumerology() {
-      // Add your numerology calculation logic here
-      this.numerology = 'Numerology result based on birthday'
-    },
-    calculateAstrology() {
-      // Add your astrology calculation logic here
-      this.astrology = 'Astrology result based on birthday'
     }
   }
 })

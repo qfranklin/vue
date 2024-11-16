@@ -5,7 +5,7 @@ export const useUserStore = defineStore('user', {
     email: '',
     token: '',
     isAdmin: false,
-    birthdate: '',
+    birthday: '',
     numerology: '',
     astrology: ''
   }),
@@ -13,51 +13,51 @@ export const useUserStore = defineStore('user', {
     isLoggedIn: (state) => !!state.token
   },
   actions: {
-    login(email: string, token: string, isAdmin: boolean, birthdate: string) {
+    login(email: string, token: string, isAdmin: boolean, birthday: string) {
       this.email = email
       this.token = token
       this.isAdmin = isAdmin
-      this.birthdate = birthdate
+      this.birthday = birthday
       this.calculateNumerology()
       this.calculateAstrology()
       localStorage.setItem('auth_token', token)
       localStorage.setItem('user_email', email)
       localStorage.setItem('is_admin', JSON.stringify(isAdmin))
-      localStorage.setItem('birthdate', birthdate)
+      localStorage.setItem('birthday', birthday)
     },
     logout() {
       this.email = ''
       this.token = ''
       this.isAdmin = false
-      this.birthdate = ''
+      this.birthday = ''
       this.numerology = ''
       this.astrology = ''
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user_email')
       localStorage.removeItem('is_admin')
-      localStorage.removeItem('birthdate')
+      localStorage.removeItem('birthday')
     },
     loadFromLocalStorage() {
       const token = localStorage.getItem('auth_token')
       const email = localStorage.getItem('user_email')
       const isAdmin = JSON.parse(localStorage.getItem('is_admin') || 'false')
-      const birthdate = localStorage.getItem('birthdate')
-      if (token && email && birthdate) {
+      const birthday = localStorage.getItem('birthday')
+      if (token && email && birthday) {
         this.token = token
         this.email = email
         this.isAdmin = isAdmin
-        this.birthdate = birthdate
+        this.birthday = birthday
         this.calculateNumerology()
         this.calculateAstrology()
       }
     },
     calculateNumerology() {
       // Add your numerology calculation logic here
-      this.numerology = 'Numerology result based on birthdate'
+      this.numerology = 'Numerology result based on birthday'
     },
     calculateAstrology() {
       // Add your astrology calculation logic here
-      this.astrology = 'Astrology result based on birthdate'
+      this.astrology = 'Astrology result based on birthday'
     }
   }
 })

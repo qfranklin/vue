@@ -17,12 +17,14 @@
               <span v-if="!isEditing" class="edit-icon" @click="startEdit">✏️</span>
             </div>
             <a v-if="isEditing" @click="submitEdit" class="submit-link">Submit</a>
-            <a v-if="isEditing" @click="cancelEdit" class="submit-link">Cancel</a>
+            <a v-if="isEditing" @click="cancelEdit" class="cancel-link">Cancel</a>
             <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
             <br>
-            <strong>Numerology:</strong> {{ numerology }}<br>
-            <strong>Astrology:</strong> {{ astrology }}
+            <div v-if="loading" class="loading-spinner">Loading...</div>
+            <div v-else :class="predictionClass">
+              <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
+            </div>
           </div>
           <p v-else>
             Welcome to our website! Please register or login to view your astrological and numerical daily predictions.
@@ -52,6 +54,9 @@ export default defineComponent({
     const isEditing = ref(false)
     const successMessage = ref('')
     const errorMessage = ref('')
+    const loading = ref(true)
+    const dailyPrediction = ref('')
+    const dailyPredictionMessage = ref('')
 
     watch(() => userStore.birthday, (newBirthday) => {
       editableBirthday.value = newBirthday.split('T')[0]
@@ -103,19 +108,37 @@ export default defineComponent({
       }
     }
 
-    onMounted(async () => {
-      if (isLoggedIn.value && !userStore.birthday) {
-        try {
-          const response = await axios.get('/api/user')
-          userStore.setBirthday(response.data.birthday)
-        } catch (error) {
-          console.error('Failed to fetch user data:', error)
-        }
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('/api/user')
+        userStore.setBirthday(response.data.birthday)
+        dailyPrediction.value = response.data.numerology.daily_prediction
+        dailyPredictionMessage.value = `Today is a ${dailyPrediction.value} day for you.`
+      } catch (error) {
+        console.error('Failed to fetch user data:', error)
+      } finally {
+        loading.value = false
+      }
+    }
+
+    onMounted(() => {
+      if (isLoggedIn.value) {
+        fetchUserData()
+      } else {
+        loading.value = false
       }
     })
 
     const numerology = computed(() => userStore.numerology)
     const astrology = computed(() => userStore.astrology)
+
+    const predictionClass = computed(() => {
+      return {
+        'good-day': dailyPrediction.value === 'good',
+        'bad-day': dailyPrediction.value === 'bad',
+        'neutral-day': dailyPrediction.value === 'neutral'
+      }
+    })
 
     return {
       isLoggedIn,
@@ -124,12 +147,15 @@ export default defineComponent({
       isEditing,
       successMessage,
       errorMessage,
+      loading,
+      dailyPredictionMessage,
       startEdit,
       cancelEdit,
       submitEdit,
       formattedBirthday,
       numerology,
-      astrology
+      astrology,
+      predictionClass
     }
   }
 })
@@ -172,11 +198,28 @@ export default defineComponent({
   cursor: pointer;
   margin-left: 0.5rem;
 }
+.cancel-link {
+  color: red;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
 .success-message {
   color: green;
 }
 .error-message {
   color: red;
+}
+.loading-spinner {
+  margin-top: 1rem;
+}
+.good-day {
+  color: green;
+}
+.bad-day {
+  color: red;
+}
+.neutral-day {
+  color: gray;
 }
 @media (min-width: 1024px) {
   .about {

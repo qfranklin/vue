@@ -17,6 +17,7 @@
               <span v-if="!isEditing" class="edit-icon" @click="startEdit">✏️</span>
             </div>
             <a v-if="isEditing" @click="submitEdit" class="submit-link">Submit</a>
+            <a v-if="isEditing" @click="cancelEdit" class="submit-link">Cancel</a>
             <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
             <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
             <br>
@@ -33,7 +34,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue'
+import { defineComponent, ref, computed, watch, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import HeaderComponent from '@/components/HeaderComponent.vue'
 import { useUserStore } from '@/stores/user'
@@ -80,13 +81,19 @@ export default defineComponent({
       editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
     }
 
+    const cancelEdit = () => {
+      isEditing.value = false
+      editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
+    }
+
     const submitEdit = async () => {
       console.log('Submitting edit...')
       try {
+        const formattedDate = new Date(editableBirthday.value).toISOString().split('T')[0] // Format the date correctly
         const response = await axios.post('/api/user/update', {
-          birthday: editableBirthday.value
+          birthday: formattedDate
         })
-        userStore.birthday = editableBirthday.value
+        userStore.setBirthday(formattedDate) // Update the userStore with the new formatted birthday
         successMessage.value = 'Birthday updated successfully!'
         errorMessage.value = ''
         isEditing.value = false
@@ -96,20 +103,33 @@ export default defineComponent({
       }
     }
 
+    onMounted(async () => {
+      if (isLoggedIn.value && !userStore.birthday) {
+        try {
+          const response = await axios.get('/api/user')
+          userStore.setBirthday(response.data.birthday)
+        } catch (error) {
+          console.error('Failed to fetch user data:', error)
+        }
+      }
+    })
+
     const numerology = computed(() => userStore.numerology)
     const astrology = computed(() => userStore.astrology)
+
     return {
       isLoggedIn,
       birthday,
       editableBirthday,
       isEditing,
+      successMessage,
+      errorMessage,
+      startEdit,
+      cancelEdit,
+      submitEdit,
       formattedBirthday,
       numerology,
-      astrology,
-      startEdit,
-      submitEdit,
-      successMessage,
-      errorMessage
+      astrology
     }
   }
 })

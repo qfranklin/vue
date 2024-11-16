@@ -13,17 +13,13 @@ export const useUserStore = defineStore('user', {
     isLoggedIn: (state) => !!state.token
   },
   actions: {
-    login(email: string, token: string, isAdmin: boolean, birthday: string) {
+    login(email: string, token: string, isAdmin: boolean) {
       this.email = email
       this.token = token
       this.isAdmin = isAdmin
-      this.birthday = birthday
-      this.calculateNumerology()
-      this.calculateAstrology()
       localStorage.setItem('auth_token', token)
       localStorage.setItem('user_email', email)
       localStorage.setItem('is_admin', JSON.stringify(isAdmin))
-      localStorage.setItem('birthday', birthday)
     },
     logout() {
       this.email = ''
@@ -42,14 +38,22 @@ export const useUserStore = defineStore('user', {
       const email = localStorage.getItem('user_email')
       const isAdmin = JSON.parse(localStorage.getItem('is_admin') || 'false')
       const birthday = localStorage.getItem('birthday')
-      if (token && email && birthday) {
+      if (token && email) {
         this.token = token
         this.email = email
         this.isAdmin = isAdmin
-        this.birthday = birthday
-        this.calculateNumerology()
-        this.calculateAstrology()
+        if (birthday) {
+          this.birthday = birthday
+          this.calculateNumerology()
+          this.calculateAstrology()
+        }
       }
+    },
+    setBirthday(birthday: string) {
+      this.birthday = birthday
+      this.calculateNumerology()
+      this.calculateAstrology()
+      localStorage.setItem('birthday', birthday)
     },
     calculateNumerology() {
       // Add your numerology calculation logic here

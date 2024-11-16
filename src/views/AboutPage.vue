@@ -5,12 +5,13 @@
       <section class="about">
         <img src="/profile.jpg" alt="Profile Picture" class="profile-image">
         <div class="description">
-          <p>Welcome to our website! This platform allows customers to register their glass blown pendants. We take pride in our unique and handcrafted products. Register your product to make it only accessible to you.</p>
           <p v-if="isLoggedIn">
-            <strong>Numerology:</strong> {{ numerology }}
-          </p>
-          <p v-if="isLoggedIn">
+            <strong>Birthday:</strong> {{ formattedBirthday }}<br>
+            <strong>Numerology:</strong> {{ numerology }}<br>
             <strong>Astrology:</strong> {{ astrology }}
+          </p>
+          <p v-else>
+            Welcome to our website! Please register or login to view your astrological and numerical daily predictions.
           </p>
         </div>
       </section>
@@ -31,10 +32,33 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore()
     const isLoggedIn = computed(() => userStore.isLoggedIn)
+    const birthday = computed(() => userStore.birthday)
+
+    const getOrdinalSuffix = (day: number) => {
+      if (day > 3 && day < 21) return 'th'
+      switch (day % 10) {
+        case 1: return 'st'
+        case 2: return 'nd'
+        case 3: return 'rd'
+        default: return 'th'
+      }
+    }
+
+    const formattedBirthday = computed(() => {
+      if (!userStore.birthday) return ''
+      const date = new Date(userStore.birthday)
+      const day = date.getUTCDate()
+      const month = date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
+      const year = date.getUTCFullYear()
+      return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`
+    })
+
     const numerology = computed(() => userStore.numerology)
     const astrology = computed(() => userStore.astrology)
     return {
       isLoggedIn,
+      birthday,
+      formattedBirthday,
       numerology,
       astrology
     }

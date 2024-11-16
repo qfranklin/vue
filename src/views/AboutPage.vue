@@ -74,12 +74,12 @@ export default defineComponent({
 
     const startEdit = () => {
       isEditing.value = true
-      editableBirthday.value = userStore.birthday
+      editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
     }
 
     const cancelEdit = () => {
       isEditing.value = false
-      editableBirthday.value = userStore.birthday
+      editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
     }
 
     const submitEdit = async () => {

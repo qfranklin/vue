@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, watch } from 'vue'
-import axios from '@/axiosConfig.ts'
+import axios from '@/axiosConfig'
 import HeaderComponent from '@/components/HeaderComponent.vue'
 import { useUserStore } from '@/stores/user'
 

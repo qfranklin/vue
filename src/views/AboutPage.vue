@@ -3,50 +3,52 @@
     <HeaderComponent />
     <main class="main-content">
       <section class="about">
-        <img src="/profile.jpg" alt="Profile Picture" class="profile-image">
-        <div class="description">
-          <div v-if="isLoggedIn">
-            <strong>Birthday:</strong>
-            <div class="editable-field">
-              <input
-                v-if="isEditing"
-                type="date"
-                v-model="editableBirthday"
-              />
-              <span v-else @click="startEdit">{{ formattedBirthday }}</span>
-              <span v-if="!isEditing" class="edit-icon" @click="startEdit">✏️</span>
+        <div class="profile-section">
+          <div class="profile-info">
+            <h1>Lifepath</h1>
+            <div v-if="isLoggedIn">
+              <strong>Birthday:</strong>
+              <div class="editable-field">
+                <input
+                  v-if="isEditing"
+                  type="date"
+                  v-model="editableBirthday"
+                />
+                <span v-else @click="startEdit">{{ formattedBirthday }}</span>
+                <span v-if="!isEditing" class="edit-icon" @click="startEdit">✏️</span>
+              </div>
+              <a v-if="isEditing" @click="submitEdit" class="submit-link">Submit</a>
+              <a v-if="isEditing" @click="cancelEdit" class="cancel-link">Cancel</a>
+              <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+              <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+              <br>
+              <div class="tooltip">
+                <strong>Life Path Number:</strong> {{ lifePathNumber }}
+                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
+                <span v-if="showTooltip === 'lifePath'" class="tooltiptext">{{ lifePathTooltip }}</span>
+              </div>
+              <br>
+              <div class="tooltip">
+                <strong>Universal Day Number:</strong> {{ universalDayNumber }}
+                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('universalDay')">?</a>
+                <span v-if="showTooltip === 'universalDay'" class="tooltiptext">{{ universalDayTooltip }}</span>
+              </div>
+              <br>
+              <div class="tooltip">
+                <strong>Personal Day Number:</strong> {{ personalDayNumber }}
+                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('personalDay')">?</a>
+                <span v-if="showTooltip === 'personalDay'" class="tooltiptext">{{ personalDayTooltip }}</span>
+              </div>
+              <br>
+              <div v-if="loading" class="loading-spinner">Loading...</div>
+              <div v-else>
+                <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
+              </div>
             </div>
-            <a v-if="isEditing" @click="submitEdit" class="submit-link">Submit</a>
-            <a v-if="isEditing" @click="cancelEdit" class="cancel-link">Cancel</a>
-            <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
-            <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-            <br>
-            <div class="tooltip">
-              <strong>Life Path Number:</strong> {{ lifePathNumber }}
-              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
-              <span v-if="showTooltip === 'lifePath'" class="tooltiptext">{{ lifePathTooltip }}</span>
-            </div>
-            <br>
-            <div class="tooltip">
-              <strong>Universal Day Number:</strong> {{ universalDayNumber }}
-              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('universalDay')">?</a>
-              <span v-if="showTooltip === 'universalDay'" class="tooltiptext">{{ universalDayTooltip }}</span>
-            </div>
-            <br>
-            <div class="tooltip">
-              <strong>Personal Day Number:</strong> {{ personalDayNumber }}
-              <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('personalDay')">?</a>
-              <span v-if="showTooltip === 'personalDay'" class="tooltiptext">{{ personalDayTooltip }}</span>
-            </div>
-            <br>
-            <div v-if="loading" class="loading-spinner">Loading...</div>
-            <div v-else >
-              <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
-            </div>
+            <p v-else>
+              Welcome to our website! Please register or login to view your astrological and numerical daily predictions.
+            </p>
           </div>
-          <p v-else>
-            Welcome to our website! Please register or login to view your astrological and numerical daily predictions.
-          </p>
         </div>
       </section>
     </main>
@@ -225,14 +227,15 @@ export default defineComponent({
   text-align: center;
   padding: 2rem;
 }
-.profile-image {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  margin-bottom: 1rem;
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
-.description {
+.profile-info {
   max-width: 600px;
+  text-align: left;
 }
 .editable-field {
   display: inline-flex;
@@ -308,5 +311,15 @@ export default defineComponent({
 .tooltip .tooltip-icon:active + .tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .profile-section {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .profile-info {
+    text-align: left;
+  }
 }
 </style>

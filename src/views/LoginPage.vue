@@ -46,8 +46,8 @@ export default defineComponent({
           password: password.value
         })
         console.log('Login successful:', response.data)
-        const { token, is_admin, birthday } = response.data
-        userStore.login(email.value, token, is_admin, birthday)
+        const { token, is_admin } = response.data
+        userStore.login(email.value, token, is_admin)
         router.push('/')
       } catch (error) {
         console.error('Login failed:', error)

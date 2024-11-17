@@ -169,7 +169,7 @@ export default defineComponent({
                   month.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
                   day.split(' + ').reduce((acc, num) => acc + parseInt(num), 0)
       const reducedSum = lifePathNumber.value
-      return `Calculated by summing the digits of your birth date (${year} + ${month} + ${day} = ${sum}) and reducing to a single digit (${reducedSum}).`
+      return `Sum the digits of your birth date (${year} + ${month} + ${day} = ${sum}) then reduce to a single digit (${reducedSum}).`
     })
 
     const universalDayTooltip = computed(() => {
@@ -181,13 +181,13 @@ export default defineComponent({
                   month.split(' + ').reduce((acc, num) => acc + parseInt(num), 0) +
                   day.split(' + ').reduce((acc, num) => acc + parseInt(num), 0)
       const reducedSum = universalDayNumber.value
-      return `Calculated by summing the digits of the current date (${year} + ${month} + ${day} = ${sum}) and reducing to a single digit (${reducedSum}).`
+      return `Sum the digits of the current date (${year} + ${month} + ${day} = ${sum}) then reduce to a single digit (${reducedSum}).`
     })
 
     const personalDayTooltip = computed(() => {
       const lifePath = lifePathNumber.value ?? 0;
       const universalDay = universalDayNumber.value ?? 0;
-      return `Calculated by adding your Life Path Number (${lifePath}) to the Universal Day Number (${universalDay}) and reducing to a single digit (${personalDayNumber.value}).`
+      return `Sum your Life Path Number (${lifePath}) and the Universal Day Number (${universalDay}) then reduce to a single digit (${personalDayNumber.value}).`
     })
 
     return {

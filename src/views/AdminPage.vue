@@ -3,6 +3,7 @@
     <HeaderComponent />
     <div class="admin-content">
       <h1>Admin Page</h1>
+      <p>Welcome, Admin!</p>
       <div v-if="loading">Loading...</div>
       <table v-else-if="analytics.length">
         <thead>
@@ -38,13 +39,23 @@ import { defineComponent, ref, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import HeaderComponent from '@/components/HeaderComponent.vue'
 
+interface Analytic {
+  session_id: string
+  user_name: string
+  user_email: string
+  event_type: string
+  product_id: string
+  page_url: string
+  created_at: string
+}
+
 export default defineComponent({
   name: 'AdminPage',
   components: {
     HeaderComponent
   },
   setup() {
-    const analytics = ref([])
+    const analytics = ref<Analytic[]>([])
     const loading = ref(true)
 
     const fetchAnalytics = async () => {

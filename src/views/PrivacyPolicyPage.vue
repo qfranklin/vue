@@ -62,4 +62,9 @@ p {
   line-height: 1.6;
   margin-bottom: 1rem;
 }
+@media (min-width: 1024px) {
+  .privacy-policy {
+    padding: 4rem;
+  }
+}
 </style>

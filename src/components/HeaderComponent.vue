@@ -81,4 +81,9 @@ button {
   color: #007bff;
   cursor: pointer;
 }
+@media (min-width: 1024px) {
+  .header {
+    padding: 1.5rem;
+  }
+}
 </style>

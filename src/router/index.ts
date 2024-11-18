@@ -4,6 +4,7 @@ import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import AdminPage from '../views/AdminPage.vue'
 import { useUserStore } from '@/stores/user'
+import { trackPageView } from '@/utils/analytics'
 
 const routes = [
   {
@@ -45,6 +46,7 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+  trackPageView(to.fullPath)
 })
 
 export default router

@@ -9,7 +9,7 @@ export function getSessionId() {
 }
 
 export function getUserId() {
-    return localStorage.getItem('user_id');
+    return localStorage.getItem('user_id') || null;
 }
 
 function generateSessionId() {

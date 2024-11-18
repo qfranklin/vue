@@ -2,7 +2,7 @@
   <div id="app">
     <HeaderComponent />
     <router-view />
-    <div v-if="true" class="privacy-notice">
+    <div v-if="showPrivacyNotice" class="privacy-notice">
       <p>We use analytics to improve your experience on our site. By continuing to use our site, you consent to our use of analytics. <a href="/privacy-policy">Learn more</a>.</p>
       <button @click="acceptAnalytics">Accept</button>
     </div>

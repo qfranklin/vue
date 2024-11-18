@@ -39,8 +39,6 @@ router.beforeEach((to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!userStore.isLoggedIn) {
       next({ name: 'Login' })
-    } else if (to.matched.some(record => record.meta.requiresAdmin) && !userStore.isAdmin) {
-      next({ name: 'AboutPage' })
     } else {
       next()
     }

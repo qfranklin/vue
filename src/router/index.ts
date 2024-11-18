@@ -3,7 +3,9 @@ import AboutPage from '../views/AboutPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import AdminPage from '../views/AdminPage.vue'
+import PrivacyPolicyPage from '../views/PrivacyPolicyPage.vue'
 import { useUserStore } from '@/stores/user'
+import { trackPageView } from '@/utils/analytics'
 
 const routes = [
   {
@@ -26,6 +28,11 @@ const routes = [
     name: 'Admin',
     component: AdminPage,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: PrivacyPolicyPage
   }
 ]
 
@@ -47,6 +54,7 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+  trackPageView(to.fullPath)
 })
 
 export default router

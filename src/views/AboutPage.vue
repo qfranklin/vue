@@ -6,21 +6,12 @@
         <div class="profile-section">
           <div class="profile-info">
             <h1>Lifepath</h1>
-            <div v-if="isLoggedIn">
+            <div>
               <strong>Birthday:</strong>
               <div class="editable-field">
-                <input
-                  v-if="isEditing"
-                  type="date"
-                  v-model="editableBirthday"
-                />
-                <span v-else @click="startEdit">{{ formattedBirthday }}</span>
-                <span v-if="!isEditing" class="edit-icon" @click="startEdit">✏️</span>
+                <span>{{ formattedBirthday }}</span>
+                <span class="edit-icon" @click="startEdit">✏️</span>
               </div>
-              <a v-if="isEditing" @click="submitEdit" class="submit-link">Submit</a>
-              <a v-if="isEditing" @click="cancelEdit" class="cancel-link">Cancel</a>
-              <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
-              <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
               <br>
               <div class="tooltip">
                 <strong>Life Path Number:</strong> {{ lifePathNumber }}
@@ -45,10 +36,10 @@
                 <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
               </div>
             </div>
-            <p v-else>
-              Welcome to our website! Please register or login to view your astrological and numerical daily predictions.
-            </p>
           </div>
+        </div>
+        <div v-if="isLoggedIn">
+          <NotesComponent />
         </div>
       </section>
     </main>
@@ -59,12 +50,14 @@
 import { defineComponent, ref, computed, watch, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import HeaderComponent from '@/components/HeaderComponent.vue'
+import NotesComponent from '@/components/NotesComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AboutPage',
   components: {
-    HeaderComponent
+    HeaderComponent,
+    NotesComponent
   },
   setup() {
     const userStore = useUserStore()
@@ -107,22 +100,21 @@ export default defineComponent({
 
     const startEdit = () => {
       isEditing.value = true
-      editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
     }
 
     const cancelEdit = () => {
       isEditing.value = false
-      editableBirthday.value = userStore.birthday.split('T')[0] // Ensure the date input is correctly formatted
+      editableBirthday.value = userStore.birthday.split('T')[0]
     }
 
     const submitEdit = async () => {
       console.log('Submitting edit...')
       try {
-        const formattedDate = new Date(editableBirthday.value).toISOString().split('T')[0] // Format the date correctly
+        const formattedDate = new Date(editableBirthday.value).toISOString().split('T')[0]
         const response = await axios.post('/api/user/update', {
           birthday: formattedDate
         })
-        userStore.setBirthday(formattedDate) // Update the userStore with the new formatted birthday
+        userStore.setBirthday(formattedDate)
         successMessage.value = 'Birthday updated successfully!'
         errorMessage.value = ''
         isEditing.value = false
@@ -185,8 +177,8 @@ export default defineComponent({
     })
 
     const personalDayTooltip = computed(() => {
-      const lifePath = lifePathNumber.value ?? 0;
-      const universalDay = universalDayNumber.value ?? 0;
+      const lifePath = lifePathNumber.value ?? 0
+      const universalDay = universalDayNumber.value ?? 0
       return `Sum your Life Path Number (${lifePath}) and the Universal Day Number (${universalDay}) then reduce to a single digit (${personalDayNumber.value}).`
     })
 

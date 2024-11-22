@@ -41,6 +41,7 @@
         <div v-if="isLoggedIn">
           <NotesComponent />
         </div>
+        <SMAChartComponent />
       </section>
     </main>
   </div>
@@ -51,13 +52,15 @@ import { defineComponent, ref, computed, watch, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import HeaderComponent from '@/components/HeaderComponent.vue'
 import NotesComponent from '@/components/NotesComponent.vue'
+import SMAChartComponent from '@/components/SMAChartComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AboutPage',
   components: {
     HeaderComponent,
-    NotesComponent
+    NotesComponent,
+    SMAChartComponent
   },
   setup() {
     const userStore = useUserStore()

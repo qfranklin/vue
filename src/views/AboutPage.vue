@@ -114,14 +114,14 @@ export default defineComponent({
       console.log('Submitting edit...')
       try {
         const formattedDate = new Date(editableBirthday.value).toISOString().split('T')[0]
-        const response = await axios.post('/api/user/update', {
+        await axios.post('/api/user/update', {
           birthday: formattedDate
         })
         userStore.setBirthday(formattedDate)
         successMessage.value = 'Birthday updated successfully!'
         errorMessage.value = ''
         isEditing.value = false
-      } catch (error) {
+      } catch {
         errorMessage.value = 'Failed to update birthday. Please try again.'
         successMessage.value = ''
       }

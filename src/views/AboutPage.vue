@@ -1,6 +1,5 @@
 <template>
   <div>
-    <HeaderComponent />
     <main class="main-content">
       <section class="about">
         <div class="profile-section">
@@ -50,7 +49,6 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch, onMounted } from 'vue'
 import axios from '@/axiosConfig'
-import HeaderComponent from '@/components/HeaderComponent.vue'
 import NotesComponent from '@/components/NotesComponent.vue'
 import SMAChartComponent from '@/components/SMAChartComponent.vue'
 import { useUserStore } from '@/stores/user'
@@ -58,7 +56,6 @@ import { useUserStore } from '@/stores/user'
 export default defineComponent({
   name: 'AboutPage',
   components: {
-    HeaderComponent,
     NotesComponent,
     SMAChartComponent
   },
@@ -213,7 +210,7 @@ export default defineComponent({
 
 <style scoped>
 .main-content {
-  padding-top: 4rem; /* Adjust this value based on the height of your header */
+  padding-top: 4rem;
 }
 .about {
   display: flex;
@@ -226,7 +223,6 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
 }
 .profile-info {
   max-width: 600px;
@@ -242,7 +238,7 @@ export default defineComponent({
 .edit-icon {
   margin-left: 0.5rem;
   cursor: pointer;
-  color: #888; /* Greyed out color */
+  color: #888;
 }
 .submit-link {
   color: blue;
@@ -280,9 +276,6 @@ export default defineComponent({
 
 .tooltip .tooltip-icon {
   margin-left: 5px;
-  text-decoration: none;
-  color: #007bff;
-  font-weight: bold;
 }
 
 .tooltip .tooltiptext {
@@ -295,7 +288,7 @@ export default defineComponent({
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 125%; /* Position the tooltip above the text */
+  bottom: 125%;
   left: 50%;
   margin-left: -110px;
   opacity: 0;
@@ -306,15 +299,5 @@ export default defineComponent({
 .tooltip .tooltip-icon:active + .tooltiptext {
   visibility: visible;
   opacity: 1;
-}
-
-@media (min-width: 768px) {
-  .profile-section {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .profile-info {
-    text-align: left;
-  }
 }
 </style>

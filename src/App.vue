@@ -1,8 +1,6 @@
 <template>
-  <div id="app">
-    <HeaderComponent />
-    <router-view />
-  </div>
+  <HeaderComponent />
+  <router-view />
 </template>
 
 <script lang="ts">

@@ -1,49 +1,42 @@
 <template>
   <div>
-    <main class="main-content">
-      <section class="about">
-        <div class="profile-section">
-          <div class="profile-info">
-            <h1>Lifepath</h1>
-            <div>
-              <strong>Birthday:</strong>
-              <div class="editable-field">
-                <span>{{ formattedBirthday }}</span>
-                <span class="edit-icon" @click="startEdit">✏️</span>
-              </div>
-              <br>
-              <div class="tooltip">
-                <strong>Life Path Number:</strong> {{ lifePathNumber }}
-                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
-                <span v-if="showTooltip === 'lifePath'" class="tooltiptext">{{ lifePathTooltip }}</span>
-              </div>
-              <br>
-              <div class="tooltip">
-                <strong>Universal Day Number:</strong> {{ universalDayNumber }}
-                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('universalDay')">?</a>
-                <span v-if="showTooltip === 'universalDay'" class="tooltiptext">{{ universalDayTooltip }}</span>
-              </div>
-              <br>
-              <div class="tooltip">
-                <strong>Personal Day Number:</strong> {{ personalDayNumber }}
-                <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('personalDay')">?</a>
-                <span v-if="showTooltip === 'personalDay'" class="tooltiptext">{{ personalDayTooltip }}</span>
-              </div>
-              <br>
-              <div v-if="loading" class="loading-spinner">Loading...</div>
-              <div v-else>
-                <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="isLoggedIn">
-          <NotesComponent />
-        </div>
-        <SMAChartComponent />
-      </section>
-    </main>
+    <div v-if="isLoggedIn">
+      <strong>Birthday:</strong>
+      <div class="editable-field">
+        <span>{{ formattedBirthday }}</span>
+        <span class="edit-icon" @click="startEdit">✏️</span>
+      </div>
+    </div>
+    <br>
+    <div class="tooltip">
+      <strong>Universal Day Number:</strong> {{ universalDayNumber }}
+      <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('universalDay')">?</a>
+      <span v-if="showTooltip === 'universalDay'" class="tooltiptext">{{ universalDayTooltip }}</span>
+    </div>
+    <br>
+    <div class="tooltip" v-if="isLoggedIn">
+      <strong>Life Path Number:</strong> {{ lifePathNumber }}
+      <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
+      <span v-if="showTooltip === 'lifePath'" class="tooltiptext">{{ lifePathTooltip }}</span>
+    </div>
+    <br>
+    <div class="tooltip" v-if="isLoggedIn">
+      <strong>Personal Day Number:</strong> {{ personalDayNumber }}
+      <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('personalDay')">?</a>
+      <span v-if="showTooltip === 'personalDay'" class="tooltiptext">{{ personalDayTooltip }}</span>
+    </div>
+    <br>
+    <div v-if="isLoggedIn">
+      <div v-if="loading" class="loading-spinner">Loading...</div>
+      <div v-else>
+        <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
+      </div>
+    </div>
   </div>
+  <div v-if="isLoggedIn">
+    <NotesComponent />
+  </div>
+  <SMAChartComponent />
 </template>
 
 <script lang="ts">
@@ -211,22 +204,6 @@ export default defineComponent({
 <style scoped>
 .main-content {
   padding-top: 4rem;
-}
-.about {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem;
-}
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.profile-info {
-  max-width: 600px;
-  text-align: left;
 }
 .editable-field {
   display: inline-flex;

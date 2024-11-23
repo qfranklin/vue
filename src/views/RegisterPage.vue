@@ -1,33 +1,31 @@
 <template>
   <div>
-    <div class="main-content">
-      <h1>Register Page</h1>
-      <form @submit.prevent="handleRegister">
-        <div>
-          <label for="name">Name:</label>
-          <input type="text" id="name" v-model="name" required>
-        </div>
-        <div>
-          <label for="password">Password:</label>
-          <input type="password" id="password" v-model="password" required>
-        </div>
-        <div>
-          <label for="password_confirmation">Confirm Password:</label>
-          <input type="password" id="password_confirmation" v-model="passwordConfirmation" required>
-        </div>
-        <div>
-          <label for="email">Email:</label>
-          <input type="email" id="email" v-model="email" required>
-        </div>
-        <div>
-          <label for="birthday">birthday:</label>
-          <input type="date" id="birthday" v-model="birthday" required>
-        </div>
-        <button type="submit">Register</button>
-      </form>
-      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
-    </div>
+    <h1>Register Page</h1>
+    <form @submit.prevent="handleRegister">
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" id="name" v-model="name" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" required>
+      </div>
+      <div>
+        <label for="password_confirmation">Confirm Password:</label>
+        <input type="password" id="password_confirmation" v-model="passwordConfirmation" required>
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" v-model="email" required>
+      </div>
+      <div>
+        <label for="birthday">birthday:</label>
+        <input type="date" id="birthday" v-model="birthday" required>
+      </div>
+      <button type="submit">Register</button>
+    </form>
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
   </div>
 </template>
 

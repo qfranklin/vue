@@ -3,7 +3,6 @@
     <nav class="left-nav">
       <router-link to="/">Home</router-link>
       <router-link v-if="isAdmin" to="/admin">Admin</router-link>
-      <router-link to="/privacy-policy">Privacy Policy</router-link>
     </nav>
     <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
@@ -80,10 +79,5 @@ button {
   border: none;
   color: #007bff;
   cursor: pointer;
-}
-@media (min-width: 1024px) {
-  .header {
-    padding: 1.5rem;
-  }
 }
 </style>

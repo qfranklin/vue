@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h2>Bitcoin Monthly Max Price Chart</h2>
-    <div class="month-selector">
-      <button @click="prevMonth" :disabled="!hasPrevMonth">Previous</button>
-      <select v-model="selectedMonth" @change="fetchMonthlyData">
-        <option v-for="month in months" :key="month.value" :value="month.value">{{ month.text }}</option>
+    <h2>Bitcoin Quarterly Max Price Chart</h2>
+    <div class="quarter-selector">
+      <button @click="prevQuarter" :disabled="!hasPrevQuarter">Previous</button>
+      <select v-model="selectedQuarter" @change="fetchQuarterlyData">
+        <option v-for="quarter in quarters" :key="quarter.value" :value="quarter.value">{{ quarter.text }}</option>
       </select>
-      <button @click="nextMonth" :disabled="!hasNextMonth">Next</button>
+      <button @click="nextQuarter" :disabled="!hasNextQuarter">Next</button>
     </div>
     <div class="chart-container">
       <canvas id="smaChart"></canvas>
@@ -33,37 +33,33 @@ export default {
   setup() {
     const bitcoinData = ref<BitcoinData[]>([]);
     const chartInstance = ref<Chart<'line', any[], any> | null>(null);
-    const selectedMonth = ref(`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`);
-    const months = ref<{ value: string; text: string }[]>([]);
+    const selectedQuarter = ref(`${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`);
+    const quarters = ref<{ value: string; text: string }[]>([]);
 
-    const fetchAvailableMonths = async () => {
+    const fetchAvailableQuarters = async () => {
       try {
-        const response = await axios.get('/api/bitcoin/available-months');
-        const { minMonth, maxMonth } = response.data;
+        const response = await axios.get('/api/bitcoin/available-quarters');
+        const { minYear, maxYear, minQuarter, maxQuarter } = response.data;
 
-        const startDate = new Date(minMonth + '-01');
-        const endDate = new Date(maxMonth + '-01');
-        endDate.setMonth(endDate.getMonth() + 1);
-        endDate.setDate(0); // Set to the last day of the previous month
-
-        const monthList = [];
-
-        while (startDate <= endDate) {
-          const yearMonth = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`;
-          monthList.push({ value: yearMonth, text: startDate.toLocaleString('default', { month: 'long', year: 'numeric' }) });
-          startDate.setMonth(startDate.getMonth() + 1);
+        const quarterList = [];
+        for (let year = minYear; year <= maxYear; year++) {
+          const startQuarter = year === minYear ? minQuarter : 1;
+          const endQuarter = year === maxYear ? maxQuarter : 4;
+          for (let quarter = startQuarter; quarter <= endQuarter; quarter++) {
+            quarterList.push({ value: `${year}-Q${quarter}`, text: `Q${quarter} ${year}` });
+          }
         }
 
-        months.value = monthList;
+        quarters.value = quarterList;
       } catch (error) {
-        console.error('Failed to fetch available months:', error);
+        console.error('Failed to fetch available quarters:', error);
       }
     };
 
-    const fetchMonthlyData = debounce(async () => {
-      const [year, month] = selectedMonth.value.split('-');
+    const fetchQuarterlyData = debounce(async () => {
+      const [year, quarter] = selectedQuarter.value.split('-Q');
       try {
-        const response = await axios.get(`/api/bitcoin/monthly/${year}/${month}`);
+        const response = await axios.get(`/api/bitcoin/quarterly-max-price/${year}/${quarter}`);
         bitcoinData.value = response.data;
         renderChart();
       } catch (error) {
@@ -83,7 +79,7 @@ export default {
       chartInstance.value = new Chart(ctx.getContext('2d')!, {
         type: 'line',
         data: {
-          labels: bitcoinData.value.map(item => item.date),
+          labels: bitcoinData.value.map(item => new Date(item.date)),
           datasets: [
             {
               label: 'Max Price',
@@ -124,64 +120,72 @@ export default {
       });
     };
 
-    const prevMonth = () => {
-      const date = new Date(selectedMonth.value + '-01T00:00:00Z');
-      date.setUTCDate(1);
-      date.setUTCMonth(date.getUTCMonth() - 1);
-      selectedMonth.value = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
-      fetchMonthlyData();
+    const prevQuarter = () => {
+      const [year, quarter] = selectedQuarter.value.split('-Q').map(Number);
+      let newYear = year;
+      let newQuarter = quarter - 1;
+      if (newQuarter < 1) {
+        newQuarter = 4;
+        newYear -= 1;
+      }
+      selectedQuarter.value = `${newYear}-Q${newQuarter}`;
+      fetchQuarterlyData();
     };
 
-    const nextMonth = () => {
-      const date = new Date(selectedMonth.value + '-01T00:00:00Z');
-      date.setUTCDate(1);
-      date.setUTCMonth(date.getUTCMonth() + 1);
-      selectedMonth.value = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
-      fetchMonthlyData();
+    const nextQuarter = () => {
+      const [year, quarter] = selectedQuarter.value.split('-Q').map(Number);
+      let newYear = year;
+      let newQuarter = quarter + 1;
+      if (newQuarter > 4) {
+        newQuarter = 1;
+        newYear += 1;
+      }
+      selectedQuarter.value = `${newYear}-Q${newQuarter}`;
+      fetchQuarterlyData();
     };
 
-    const hasPrevMonth = computed(() => {
-      const currentIndex = months.value.findIndex(month => month.value === selectedMonth.value);
+    const hasPrevQuarter = computed(() => {
+      const currentIndex = quarters.value.findIndex(quarter => quarter.value === selectedQuarter.value);
       return currentIndex > 0;
     });
 
-    const hasNextMonth = computed(() => {
-      const currentIndex = months.value.findIndex(month => month.value === selectedMonth.value);
-      return currentIndex < months.value.length - 1;
+    const hasNextQuarter = computed(() => {
+      const currentIndex = quarters.value.findIndex(quarter => quarter.value === selectedQuarter.value);
+      return currentIndex < quarters.value.length - 1;
     });
 
     onMounted(() => {
-      fetchAvailableMonths();
-      fetchMonthlyData();
+      fetchAvailableQuarters();
+      fetchQuarterlyData();
     });
 
     return {
       bitcoinData,
-      selectedMonth,
-      months,
-      prevMonth,
-      nextMonth,
-      fetchMonthlyData,
-      hasPrevMonth,
-      hasNextMonth
+      selectedQuarter,
+      quarters,
+      prevQuarter,
+      nextQuarter,
+      fetchQuarterlyData,
+      hasPrevQuarter,
+      hasNextQuarter
     };
   }
 };
 </script>
 
 <style scoped>
-.month-selector {
+.quarter-selector {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
-.month-selector button {
+.quarter-selector button {
   margin: 0 10px;
 }
 .chart-container {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 600px;
 }
 canvas {
   max-width: 100%;

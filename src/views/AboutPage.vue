@@ -32,9 +32,9 @@
         <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
       </div>
     </div>
-  </div>
-  <div v-if="isLoggedIn">
-    <NotesComponent />
+    <div v-if="isLoggedIn">
+      <NotesComponent />
+    </div>
   </div>
   <SMAChartComponent />
 </template>

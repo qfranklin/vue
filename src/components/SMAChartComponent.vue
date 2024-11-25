@@ -149,7 +149,7 @@ export default {
     };
 
     const detectCrossEvents = (data: BitcoinData[]) => {
-      const annotations = [];
+      const annotations: any[] = [];
       let goldenCrossCount = 0;
       let deathCrossCount = 0;
 

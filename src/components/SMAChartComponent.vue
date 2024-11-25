@@ -138,9 +138,6 @@ export default {
                   ];
                 }
               }
-            },
-            annotation: {
-              annotations: annotations
             }
           }
         }

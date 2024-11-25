@@ -26,6 +26,8 @@ Chart.register(...registerables);
 interface BitcoinData {
   date: string;
   max_price: number;
+  sma_50: number;
+  sma_200: number;
 }
 
 export default {
@@ -76,15 +78,35 @@ export default {
       if (chartInstance.value) {
         chartInstance.value.destroy();
       }
+
+      const labels = bitcoinData.value.map(item => new Date(item.date));
+      const maxPriceData = bitcoinData.value.map(item => item.max_price);
+      const sma50Data = bitcoinData.value.map(item => item.sma_50);
+      const sma200Data = bitcoinData.value.map(item => item.sma_200);
+
+      const annotations = detectCrossEvents(bitcoinData.value);
+
       chartInstance.value = new Chart(ctx.getContext('2d')!, {
         type: 'line',
         data: {
-          labels: bitcoinData.value.map(item => new Date(item.date)),
+          labels: labels,
           datasets: [
             {
               label: 'Max Price',
-              data: bitcoinData.value.map(item => item.max_price),
+              data: maxPriceData,
               borderColor: 'blue',
+              fill: false
+            },
+            {
+              label: '50-day SMA',
+              data: sma50Data,
+              borderColor: 'orange',
+              fill: false
+            },
+            {
+              label: '200-day SMA',
+              data: sma200Data,
+              borderColor: 'red',
               fill: false
             }
           ]
@@ -110,14 +132,101 @@ export default {
                   const data = bitcoinData.value[context.dataIndex];
                   return [
                     `Date: ${data.date}`,
-                    `Max Price: ${data.max_price}`
+                    `Max Price: ${data.max_price}`,
+                    `50-day SMA: ${data.sma_50}`,
+                    `200-day SMA: ${data.sma_200}`
                   ];
                 }
               }
+            },
+            annotation: {
+              annotations: annotations
             }
           }
         }
       });
+    };
+
+    const detectCrossEvents = (data) => {
+      const annotations = [];
+      let goldenCrossCount = 0;
+      let deathCrossCount = 0;
+
+      for (let i = 1; i < data.length; i++) {
+        const prev = data[i - 1];
+        const curr = data[i];
+
+        if (prev.sma_50 < prev.sma_200 && curr.sma_50 > curr.sma_200) {
+          goldenCrossCount++;
+          deathCrossCount = 0;
+          if (goldenCrossCount >= 3) {
+            annotations.push({
+              type: 'line',
+              mode: 'vertical',
+              scaleID: 'x',
+              value: curr.date,
+              borderColor: 'green',
+              borderWidth: 2,
+              label: {
+                content: 'Golden Cross (3+ days)',
+                enabled: true,
+                position: 'top'
+              }
+            });
+          } else {
+            annotations.push({
+              type: 'line',
+              mode: 'vertical',
+              scaleID: 'x',
+              value: curr.date,
+              borderColor: 'green',
+              borderWidth: 1,
+              label: {
+                content: 'Golden Cross',
+                enabled: true,
+                position: 'top'
+              }
+            });
+          }
+        } else if (prev.sma_50 > prev.sma_200 && curr.sma_50 < curr.sma_200) {
+          deathCrossCount++;
+          goldenCrossCount = 0;
+          if (deathCrossCount >= 3) {
+            annotations.push({
+              type: 'line',
+              mode: 'vertical',
+              scaleID: 'x',
+              value: curr.date,
+              borderColor: 'red',
+              borderWidth: 2,
+              label: {
+                content: 'Death Cross (3+ days)',
+                enabled: true,
+                position: 'top'
+              }
+            });
+          } else {
+            annotations.push({
+              type: 'line',
+              mode: 'vertical',
+              scaleID: 'x',
+              value: curr.date,
+              borderColor: 'red',
+              borderWidth: 1,
+              label: {
+                content: 'Death Cross',
+                enabled: true,
+                position: 'top'
+              }
+            });
+          }
+        } else {
+          goldenCrossCount = 0;
+          deathCrossCount = 0;
+        }
+      }
+
+      return annotations;
     };
 
     const prevQuarter = () => {

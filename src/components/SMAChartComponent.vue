@@ -19,11 +19,12 @@ import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import debounce from 'lodash/debounce';
 
-Chart.register(...registerables);
+Chart.register(...registerables, annotationPlugin);
 
-interface BitcoinData {
+export interface BitcoinData {
   date: string;
   max_price: number;
   sma_50: number;
@@ -138,6 +139,9 @@ export default {
                   ];
                 }
               }
+            },
+            annotation: {
+              annotations: annotations
             }
           }
         }

@@ -19,9 +19,10 @@ import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import debounce from 'lodash/debounce';
 
-Chart.register(...registerables);
+Chart.register(...registerables, annotationPlugin);
 
 interface BitcoinData {
   date: string;
@@ -147,7 +148,7 @@ export default {
       });
     };
 
-    const detectCrossEvents = (data) => {
+    const detectCrossEvents = (data: BitcoinData[]) => {
       const annotations = [];
       let goldenCrossCount = 0;
       let deathCrossCount = 0;

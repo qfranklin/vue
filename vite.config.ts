@@ -22,4 +22,12 @@ export default defineConfig({
       },
     },
   },
+  optimizeDeps: {
+    include: ['chartjs-plugin-annotation']
+  },
+  build: {
+    rollupOptions: {
+      external: ['chartjs-plugin-annotation']
+    }
+  }
 })

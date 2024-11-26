@@ -34,7 +34,7 @@ export default {
   name: 'SMAChart',
   setup() {
     const bitcoinData = ref<BitcoinData[]>([]);
-    const chartInstance = ref<Chart<'line', any[], any> | null>(null);
+    const chartInstance = ref<Chart<'line', number[], string> | null>(null);
     const selectedQuarter = ref(`${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`);
     const quarters = ref<{ value: string; text: string }[]>([]);
 

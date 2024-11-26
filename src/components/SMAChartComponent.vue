@@ -19,10 +19,9 @@ import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
-import annotationPlugin from 'chartjs-plugin-annotation';
 import debounce from 'lodash/debounce';
 
-Chart.register(...registerables, annotationPlugin);
+Chart.register(...registerables);
 
 export interface BitcoinData {
   date: string;

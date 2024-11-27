@@ -45,18 +45,12 @@ export default {
       chartInstance.value = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: smaData.value.map(item => format(new Date(item.date), 'yyyy-MM-dd')),
+          labels: smaData.value.map(item => format(new Date(item.date + 'T00:00:00'), 'yyyy-MM-dd')),
           datasets: [
             {
               label: 'Max Price',
               data: smaData.value.map(item => item.max_price),
               borderColor: 'blue',
-              fill: false
-            },
-            {
-              label: 'SMA',
-              data: smaData.value.map(item => item.sma_50),
-              borderColor: 'red',
               fill: false
             }
           ]
@@ -67,7 +61,11 @@ export default {
             x: {
               type: 'time',
               time: {
-                unit: 'day'
+                unit: 'day',
+                tooltipFormat: 'MMM dd, yyyy',
+                displayFormats: {
+                  day: 'MMM dd, yyyy'
+                }
               }
             },
             y: {
@@ -80,7 +78,6 @@ export default {
                 label: function (context) {
                   const data = smaData.value[context.dataIndex]
                   return [
-                    `Date: ${format(new Date(data.date), 'yyyy-MM-dd')}`,
                     `Max Price: ${data.max_price}`,
                     `50-day SMA: ${data.sma_50}`,
                     `200-day SMA: ${data.sma_200}`

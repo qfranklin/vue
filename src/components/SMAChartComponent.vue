@@ -67,12 +67,14 @@ export default {
     const chartInstance = ref<Chart | null>(null)
 
     const fetchCryptoData = async (crypto: string) => {
+      if (activeCrypto.value === crypto) return;
       activeCrypto.value = crypto;
       const endDate = new Date();
       const startDate = subDays(endDate, 30);
       try {
-        const response = await axios.get(`/api/${crypto.toLowerCase()}/sma`, {
+        const response = await axios.get(`/api/crypto/get-prices`, {
           params: {
+            crypto: crypto.toLowerCase(),
             start_date: format(startDate, 'yyyy-MM-dd'),
             end_date: format(endDate, 'yyyy-MM-dd')
           }
@@ -83,21 +85,6 @@ export default {
         console.error(`Failed to fetch ${crypto} data:`, error);
       }
     };
-
-    const fetchSMAData = async (startDate: Date, endDate: Date) => {
-      try {
-        const response = await axios.get(`/api/bitcoin/sma`, {
-          params: {
-            start_date: format(startDate, 'yyyy-MM-dd'),
-            end_date: format(endDate, 'yyyy-MM-dd')
-          }
-        })
-        smaData.value = response.data
-        renderChart()
-      } catch (error) {
-        console.error('Failed to fetch SMA data:', error)
-      }
-    }
 
     const renderChart = () => {
       const canvas = document.getElementById('smaChart') as HTMLCanvasElement
@@ -166,9 +153,7 @@ export default {
     }
 
     onMounted(() => {
-      const endDate = new Date()
-      const startDate = subDays(endDate, 30)
-      fetchSMAData(startDate, endDate)
+      fetchCryptoData(activeCrypto.value);
     })
 
     return {

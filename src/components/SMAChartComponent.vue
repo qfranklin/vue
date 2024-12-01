@@ -75,9 +75,7 @@ export default {
               borderColor: '#333333',
               backgroundColor: '#333333',
               fill: false,
-              pointRadius: 0,
-              hitRadius: 4,
-              hoverRadius: 4
+              pointRadius: 0
             }
           ]
         },

@@ -49,7 +49,7 @@ export default {
           datasets: [
             {
               label: 'Max Price',
-              data: smaData.value.map(item => item.max_price),
+              data: smaData.value.map(item => item.high_24h),
               borderColor: 'blue',
               fill: false
             }
@@ -78,7 +78,7 @@ export default {
                 label: function (context) {
                   const data = smaData.value[context.dataIndex]
                   return [
-                    `Max Price: ${data.max_price}`,
+                    `Max Price: ${data.high_24h}`,
                     `50-day SMA: ${data.sma_50}`,
                     `200-day SMA: ${data.sma_200}`
                   ]

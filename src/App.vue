@@ -1,6 +1,8 @@
 <template>
   <HeaderComponent />
-  <router-view />
+  <div class="main-content">
+    <router-view />
+  </div>
 </template>
 
 <script lang="ts">
@@ -14,3 +16,9 @@ export default defineComponent({
   }
 })
 </script>
+
+<style scoped>
+.main-content {
+  padding-top: 50px;
+}
+</style>

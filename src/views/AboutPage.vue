@@ -1,7 +1,7 @@
 <template>
   <section>
+    <SMAChartComponent />
     <div v-if="isLoggedIn">
-      <SMAChartComponent />
       <NotesComponent />
       <LifepathComponent />
     </div>

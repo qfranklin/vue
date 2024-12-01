@@ -5,7 +5,7 @@
         v-for="crypto in cryptos"
         :key="crypto"
         :class="{ active: activeCrypto === crypto }"
-        @click="fetchCryptoData(crypto)"
+        @click="fetchCryptoData(crypto, false)"
       >
         {{ crypto }}
       </button>
@@ -66,8 +66,8 @@ export default {
     const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
     const chartInstance = ref<Chart | null>(null)
 
-    const fetchCryptoData = async (crypto: string) => {
-      if (activeCrypto.value === crypto) return;
+    const fetchCryptoData = async (crypto: string, pageLoad: boolean) => {
+      if (activeCrypto.value === crypto && !pageLoad) return;
       activeCrypto.value = crypto;
       const endDate = new Date();
       const startDate = subDays(endDate, 30);
@@ -116,14 +116,14 @@ export default {
             y: {
               beginAtZero: false,
               ticks: {
-                stepSize: 10000 
+                stepSize: 10000
               }
             }
           },
           interaction: {
             intersect: false,
             mode: 'nearest',
-            axis: 'x'      
+            axis: 'x'
           },
           plugins: {
             legend: {
@@ -153,7 +153,7 @@ export default {
     }
 
     onMounted(() => {
-      fetchCryptoData(activeCrypto.value);
+      fetchCryptoData(activeCrypto.value, true);
     })
 
     return {

@@ -5,7 +5,7 @@
         v-for="crypto in cryptos"
         :key="crypto"
         :class="{ active: activeCrypto === crypto }"
-        @click="fetchCryptoData(crypto, false)"
+        @click="fetchCryptoDataDebounced(crypto, false)"
         :disabled="loading"
       >
         {{ crypto }}
@@ -22,6 +22,7 @@ import { Chart, registerables, Tooltip} from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
 import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
+import { debounce } from 'lodash';
 
 declare module 'chart.js' {
   interface TooltipPositionerMap {
@@ -91,11 +92,14 @@ export default {
       }
     };
 
+    const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300);
+
     const renderChart = () => {
       const canvas = document.getElementById('smaChart') as HTMLCanvasElement
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       if (chartInstance.value) {
         chartInstance.value.destroy()
+        chartInstance.value = null
       }
       chartInstance.value = new Chart(ctx, {
         type: 'line',
@@ -158,14 +162,14 @@ export default {
     }
 
     onMounted(() => {
-      fetchCryptoData(activeCrypto.value, true);
+      fetchCryptoDataDebounced(activeCrypto.value, true);
     })
 
     return {
       smaData,
       cryptos,
       activeCrypto,
-      fetchCryptoData,
+      fetchCryptoDataDebounced,
       loading
     }
   }

@@ -73,10 +73,11 @@ export default {
               label: 'Max Price',
               data: smaData.value.map(item => item.high_24h),
               borderColor: '#333333',
+              backgroundColor: '#333333',
               fill: false,
               pointRadius: 0,
-              hitRadius: 10,
-              hoverRadius: 10
+              hitRadius: 4,
+              hoverRadius: 4
             }
           ]
         },
@@ -92,6 +93,11 @@ export default {
                 stepSize: 10000 
               }
             }
+          },
+          interaction: {
+            intersect: false,
+            mode: 'nearest',
+            axis: 'x'      
           },
           plugins: {
             legend: {

@@ -1,6 +1,5 @@
 <template>
   <div class="profile-info">
-    <h1>Lifepath</h1>
     <div>
       <strong>Birthday:</strong>
       <div class="editable-field" @click="startEdit">
@@ -47,6 +46,11 @@
 import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
+
+export interface Lifepath {
+  id: number;
+  description: string;
+}
 
 export default defineComponent({
   name: 'LifepathComponent',

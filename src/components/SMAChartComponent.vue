@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Bitcoin SMA Chart</h2>
     <canvas id="smaChart"></canvas>
   </div>
 </template>
@@ -8,17 +7,51 @@
 <script lang="ts">
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { Chart, registerables } from 'chart.js'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { Chart, registerables, Tooltip} from 'chart.js'
+import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
+import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
-import type { SMAData } from '@/types'
+
+declare module 'chart.js' {
+  interface TooltipPositionerMap {
+    custom: (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) => { x: number; y: number; xAlign: string; yAlign: string } | false;
+  }
+}
+
+export interface TooltipPositionerMap {
+  custom: (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) => { x: number; y: number; xAlign: string; yAlign: string } | false;
+}
 
 Chart.register(...registerables)
+
+Tooltip.positioners.custom = function(items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) {
+  const pos = Tooltip.positioners.average.call(this as unknown as TooltipModel<'line'>, items as unknown as ActiveElement[], eventPosition);
+
+  if (!pos) {
+    return false;
+  }
+
+  const chart = (this as unknown as TooltipModel<'line'>).chart;
+  const dataPointY = items[0].element.y;
+  const chartHeight = chart.chartArea.bottom - chart.chartArea.top;
+
+  // Display tooltip at the top if the data point is in the bottom half of the chart
+  // Otherwise, display tooltip at the bottom
+  const yAlign = dataPointY > chartHeight / 2 ? 'top' : 'bottom';
+  const y = yAlign === 'top' ? chart.chartArea.top : chart.chartArea.bottom;
+
+  return {
+    x: pos.x,
+    y: y,
+    xAlign: 'center',
+    yAlign: yAlign,
+  };
+};
 
 export default {
   name: 'SMAChartComponent',
   setup() {
-    const smaData = ref<SMAData[]>([])
+    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
     const chartInstance = ref<Chart | null>(null)
 
     const fetchSMAData = async (startDate: Date, endDate: Date) => {
@@ -50,8 +83,10 @@ export default {
             {
               label: 'Max Price',
               data: smaData.value.map(item => item.high_24h),
-              borderColor: 'blue',
-              fill: false
+              borderColor: '#333333',
+              backgroundColor: '#333333',
+              fill: false,
+              pointRadius: 0
             }
           ]
         },
@@ -59,29 +94,39 @@ export default {
           responsive: true,
           scales: {
             x: {
-              type: 'time',
-              time: {
-                unit: 'day',
-                tooltipFormat: 'MMM dd, yyyy',
-                displayFormats: {
-                  day: 'MMM dd, yyyy'
-                }
-              }
+              display: false
             },
             y: {
-              beginAtZero: false
+              beginAtZero: false,
+              ticks: {
+                stepSize: 10000 
+              }
             }
           },
+          interaction: {
+            intersect: false,
+            mode: 'nearest',
+            axis: 'x'      
+          },
           plugins: {
+            legend: {
+              display: false
+            },
             tooltip: {
+              position: 'custom',
+              caretSize: 0,
+              displayColors: false,
               callbacks: {
+                title: function () {
+                  return ''
+                },
                 label: function (context) {
                   const data = smaData.value[context.dataIndex]
-                  return [
-                    `Max Price: ${data.high_24h}`,
-                    `50-day SMA: ${data.sma_50}`,
-                    `200-day SMA: ${data.sma_200}`
-                  ]
+                  const price = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(data.high_24h)
+                  //const sma50 = Math.round(data.sma_50)
+                  //const sma200 = Math.round(data.sma_200)
+                  const date = format(new Date(data.date + 'T00:00:00'), 'EEE, MMM d')
+                  return `${price} ${date}`
                 }
               }
             }
@@ -91,8 +136,8 @@ export default {
     }
 
     onMounted(() => {
-      const startDate = startOfMonth(new Date())
-      const endDate = endOfMonth(new Date())
+      const endDate = new Date()
+      const startDate = subDays(endDate, 30)
       fetchSMAData(startDate, endDate)
     })
 

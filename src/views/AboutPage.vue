@@ -1,12 +1,10 @@
 <template>
-  <section class="about">
-    <div class="profile-section">
+  <section>
+    <div v-if="isLoggedIn">
+      <SMAChartComponent />
+      <NotesComponent />
       <LifepathComponent />
     </div>
-    <div v-if="isLoggedIn">
-      <NotesComponent />
-    </div>
-    <SMAChartComponent />
   </section>
 </template>
 
@@ -35,17 +33,3 @@ export default defineComponent({
 })
 </script>
 
-<style scoped>
-.about {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem;
-}
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-</style>

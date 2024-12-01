@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button v-if="!showTextBox" @click="showTextBox = true" class="notes-button">Add notes for today</button>
+    <button v-if="!showTextBox" @click="showTextBox = true" class="notes-button">Add notes</button>
     <div v-else>
       <textarea v-model="newNote" ref="noteTextBox" class="notes-textbox"></textarea>
       <button @click="saveNote" class="notes-button">Save</button>
@@ -12,16 +12,23 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import axios from 'axios'
 
-export default {
+export interface Note {
+  id: number
+  content: string
+  created_at: string
+}
+
+export default defineComponent({
   name: 'NotesComponent',
   data() {
     return {
       showTextBox: false,
       newNote: '',
-      notes: []
+      notes: [] as Note[]
     }
   },
   mounted() {
@@ -48,7 +55,7 @@ export default {
         console.error('Failed to save note:', error)
       }
     },
-    formatTime(time) {
+    formatTime(time: string) {
       const date = new Date(time)
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -57,12 +64,12 @@ export default {
     showTextBox(newVal) {
       if (newVal) {
         this.$nextTick(() => {
-          this.$refs.noteTextBox.focus()
+          (this.$refs.noteTextBox as HTMLTextAreaElement).focus()
         })
       }
     }
   }
-}
+})
 </script>
 
 <style scoped>
@@ -79,10 +86,9 @@ export default {
 .notes-textbox {
   width: 100%;
   height: 100px;
-  margin-bottom: 10px;
 }
 
 .note {
-  margin-top: 10px;
+  margin-bottom: 1rem;
 }
 </style>

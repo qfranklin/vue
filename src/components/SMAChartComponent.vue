@@ -6,6 +6,7 @@
         :key="crypto"
         :class="{ active: activeCrypto === crypto }"
         @click="fetchCryptoData(crypto, false)"
+        :disabled="loading"
       >
         {{ crypto }}
       </button>
@@ -63,11 +64,13 @@ export default {
   setup() {
     const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
     const activeCrypto = ref('Bitcoin');
-    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
-    const chartInstance = ref<Chart | null>(null)
+    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([]);
+    const chartInstance = ref<Chart | null>(null);
+    const loading = ref(false);
 
     const fetchCryptoData = async (crypto: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && !pageLoad) return;
+      loading.value = true;
       activeCrypto.value = crypto;
       const endDate = new Date();
       const startDate = subDays(endDate, 30);
@@ -83,6 +86,8 @@ export default {
         renderChart();
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -160,7 +165,8 @@ export default {
       smaData,
       cryptos,
       activeCrypto,
-      fetchCryptoData
+      fetchCryptoData,
+      loading
     }
   }
 }

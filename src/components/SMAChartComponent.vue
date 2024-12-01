@@ -5,7 +5,8 @@
         v-for="crypto in cryptos"
         :key="crypto"
         :class="{ active: activeCrypto === crypto }"
-        @click="fetchCryptoData(crypto)"
+        @click="fetchCryptoDataDebounced(crypto, false)"
+        :disabled="loading"
       >
         {{ crypto }}
       </button>
@@ -21,6 +22,7 @@ import { Chart, registerables, Tooltip} from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
 import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
+import { debounce } from 'lodash';
 
 declare module 'chart.js' {
   interface TooltipPositionerMap {
@@ -63,11 +65,13 @@ export default {
   setup() {
     const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
     const activeCrypto = ref('Bitcoin');
-    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
-    const chartInstance = ref<Chart | null>(null)
+    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([]);
+    const chartInstance = ref<Chart | null>(null);
+    const loading = ref(false);
 
-    const fetchCryptoData = async (crypto: string) => {
-      if (activeCrypto.value === crypto) return;
+    const fetchCryptoData = async (crypto: string, pageLoad: boolean) => {
+      if (activeCrypto.value === crypto && !pageLoad) return;
+      loading.value = true;
       activeCrypto.value = crypto;
       const endDate = new Date();
       const startDate = subDays(endDate, 30);
@@ -83,14 +87,19 @@ export default {
         renderChart();
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error);
+      } finally {
+        loading.value = false;
       }
     };
+
+    const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300);
 
     const renderChart = () => {
       const canvas = document.getElementById('smaChart') as HTMLCanvasElement
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
       if (chartInstance.value) {
         chartInstance.value.destroy()
+        chartInstance.value = null
       }
       chartInstance.value = new Chart(ctx, {
         type: 'line',
@@ -116,14 +125,14 @@ export default {
             y: {
               beginAtZero: false,
               ticks: {
-                stepSize: 10000 
+                stepSize: 10000
               }
             }
           },
           interaction: {
             intersect: false,
             mode: 'nearest',
-            axis: 'x'      
+            axis: 'x'
           },
           plugins: {
             legend: {
@@ -153,14 +162,15 @@ export default {
     }
 
     onMounted(() => {
-      fetchCryptoData(activeCrypto.value);
+      fetchCryptoDataDebounced(activeCrypto.value, true);
     })
 
     return {
       smaData,
       cryptos,
       activeCrypto,
-      fetchCryptoData
+      fetchCryptoDataDebounced,
+      loading
     }
   }
 }

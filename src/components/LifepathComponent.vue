@@ -1,6 +1,5 @@
 <template>
   <div class="profile-info">
-    <h1>Lifepath</h1>
     <div>
       <strong>Birthday:</strong>
       <div class="editable-field" @click="startEdit">

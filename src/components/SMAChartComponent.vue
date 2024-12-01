@@ -1,6 +1,5 @@
 <template>
   <div>
-    <h2>Bitcoin SMA Chart</h2>
     <canvas id="smaChart"></canvas>
   </div>
 </template>

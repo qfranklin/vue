@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button v-if="!showTextBox" @click="showTextBox = true" class="notes-button">Add notes for today</button>
+    <button v-if="!showTextBox" @click="showTextBox = true" class="notes-button">Add notes</button>
     <div v-else>
       <textarea v-model="newNote" ref="noteTextBox" class="notes-textbox"></textarea>
       <button @click="saveNote" class="notes-button">Save</button>
@@ -12,7 +12,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from 'axios'
 
 export default {

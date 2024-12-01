@@ -8,7 +8,7 @@
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 
 Chart.register(...registerables)
@@ -48,8 +48,11 @@ export default {
             {
               label: 'Max Price',
               data: smaData.value.map(item => item.high_24h),
-              borderColor: 'blue',
-              fill: false
+              borderColor: '#333333',
+              fill: false,
+              pointRadius: 0,
+              hitRadius: 10,
+              hoverRadius: 10
             }
           ]
         },
@@ -57,29 +60,34 @@ export default {
           responsive: true,
           scales: {
             x: {
-              type: 'time',
-              time: {
-                unit: 'day',
-                tooltipFormat: 'MMM dd, yyyy',
-                displayFormats: {
-                  day: 'MMM dd, yyyy'
-                }
-              }
+              display: false
             },
             y: {
-              beginAtZero: false
+              beginAtZero: false,
+              ticks: {
+                stepSize: 10000 
+              }
             }
           },
           plugins: {
+            legend: {
+              display: false
+            },
             tooltip: {
+              position: 'average',
+              caretSize: 0,
+              displayColors: false,
               callbacks: {
+                title: function () {
+                  return ''
+                },
                 label: function (context) {
                   const data = smaData.value[context.dataIndex]
-                  return [
-                    `Max Price: ${data.high_24h}`,
-                    `50-day SMA: ${data.sma_50}`,
-                    `200-day SMA: ${data.sma_200}`
-                  ]
+                  const price = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(data.high_24h)
+                  //const sma50 = Math.round(data.sma_50)
+                  //const sma200 = Math.round(data.sma_200)
+                  const date = format(new Date(data.date + 'T00:00:00'), 'EEE, MMM d')
+                  return `${price} ${date}`
                 }
               }
             }
@@ -89,8 +97,8 @@ export default {
     }
 
     onMounted(() => {
-      const startDate = startOfMonth(new Date())
-      const endDate = endOfMonth(new Date())
+      const endDate = new Date()
+      const startDate = subDays(endDate, 30)
       fetchSMAData(startDate, endDate)
     })
 

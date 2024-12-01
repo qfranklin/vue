@@ -11,14 +11,13 @@ import { ref, onMounted } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { startOfMonth, endOfMonth, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
-import type { SMAData } from '@/types'
 
 Chart.register(...registerables)
 
 export default {
   name: 'SMAChartComponent',
   setup() {
-    const smaData = ref<SMAData[]>([])
+    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
     const chartInstance = ref<Chart | null>(null)
 
     const fetchSMAData = async (startDate: Date, endDate: Date) => {

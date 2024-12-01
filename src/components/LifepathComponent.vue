@@ -47,6 +47,11 @@ import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
+export interface Lifepath {
+  id: number;
+  description: string;
+}
+
 export default defineComponent({
   name: 'LifepathComponent',
   setup() {

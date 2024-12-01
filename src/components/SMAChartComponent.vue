@@ -7,20 +7,31 @@
 <script lang="ts">
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { Chart, registerables, Tooltip } from 'chart.js'
+import { Chart, registerables, Tooltip} from 'chart.js'
+import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
 import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 
+declare module 'chart.js' {
+  interface TooltipPositionerMap {
+    custom: (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) => { x: number; y: number; xAlign: string; yAlign: string } | false;
+  }
+}
+
+export interface TooltipPositionerMap {
+  custom: (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) => { x: number; y: number; xAlign: string; yAlign: string } | false;
+}
+
 Chart.register(...registerables)
 
-Tooltip.positioners.custom = function(items) {
-  const pos = Tooltip.positioners.average(items);
+Tooltip.positioners.custom = function(items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) {
+  const pos = Tooltip.positioners.average.call(this as unknown as TooltipModel<'line'>, items as unknown as ActiveElement[], eventPosition);
 
   if (!pos) {
     return false;
   }
 
-  const chart = this.chart;
+  const chart = (this as unknown as TooltipModel<'line'>).chart;
   const dataPointY = items[0].element.y;
   const chartHeight = chart.chartArea.bottom - chart.chartArea.top;
 

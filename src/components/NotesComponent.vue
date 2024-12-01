@@ -16,7 +16,7 @@
 import { defineComponent } from 'vue'
 import axios from 'axios'
 
-interface Note {
+export interface Note {
   id: number
   content: string
   created_at: string

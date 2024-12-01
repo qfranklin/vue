@@ -7,11 +7,35 @@
 <script lang="ts">
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
-import { Chart, registerables } from 'chart.js'
+import { Chart, registerables, Tooltip } from 'chart.js'
 import { subDays, format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 
 Chart.register(...registerables)
+
+Tooltip.positioners.custom = function(items) {
+  const pos = Tooltip.positioners.average(items);
+
+  if (!pos) {
+    return false;
+  }
+
+  const chart = this.chart;
+  const dataPointY = items[0].element.y;
+  const chartHeight = chart.chartArea.bottom - chart.chartArea.top;
+
+  // Display tooltip at the top if the data point is in the bottom half of the chart
+  // Otherwise, display tooltip at the bottom
+  const yAlign = dataPointY > chartHeight / 2 ? 'top' : 'bottom';
+  const y = yAlign === 'top' ? chart.chartArea.top : chart.chartArea.bottom;
+
+  return {
+    x: pos.x,
+    y: y,
+    xAlign: 'center',
+    yAlign: yAlign,
+  };
+};
 
 export default {
   name: 'SMAChartComponent',
@@ -74,7 +98,7 @@ export default {
               display: false
             },
             tooltip: {
-              position: 'average',
+              position: 'custom',
               caretSize: 0,
               displayColors: false,
               callbacks: {

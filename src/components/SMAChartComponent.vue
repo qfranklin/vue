@@ -1,5 +1,15 @@
 <template>
   <div>
+    <div class="crypto-buttons">
+      <button
+        v-for="crypto in cryptos"
+        :key="crypto"
+        :class="{ active: activeCrypto === crypto }"
+        @click="fetchCryptoData(crypto)"
+      >
+        {{ crypto }}
+      </button>
+    </div>
     <canvas id="smaChart"></canvas>
   </div>
 </template>
@@ -51,8 +61,28 @@ Tooltip.positioners.custom = function(items: TooltipItem<'line'>[], eventPositio
 export default {
   name: 'SMAChartComponent',
   setup() {
+    const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
+    const activeCrypto = ref('Bitcoin');
     const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([])
     const chartInstance = ref<Chart | null>(null)
+
+    const fetchCryptoData = async (crypto: string) => {
+      activeCrypto.value = crypto;
+      const endDate = new Date();
+      const startDate = subDays(endDate, 30);
+      try {
+        const response = await axios.get(`/api/${crypto.toLowerCase()}/sma`, {
+          params: {
+            start_date: format(startDate, 'yyyy-MM-dd'),
+            end_date: format(endDate, 'yyyy-MM-dd')
+          }
+        });
+        smaData.value = response.data;
+        renderChart();
+      } catch (error) {
+        console.error(`Failed to fetch ${crypto} data:`, error);
+      }
+    };
 
     const fetchSMAData = async (startDate: Date, endDate: Date) => {
       try {
@@ -142,13 +172,36 @@ export default {
     })
 
     return {
-      smaData
+      smaData,
+      cryptos,
+      activeCrypto,
+      fetchCryptoData
     }
   }
 }
 </script>
 
 <style scoped>
+.crypto-buttons {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.crypto-buttons button {
+  padding: 5px;
+  border: none;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.crypto-buttons button.active {
+  background-color: #007bff;
+  color: white;
+}
+
 canvas {
   max-width: 100%;
 }

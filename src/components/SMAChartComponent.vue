@@ -65,7 +65,7 @@ export default {
   setup() {
     const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
     const activeCrypto = ref('Bitcoin');
-    const smaData = ref<Array<{ date: string; high_24h: number; ma_10: number; ma_50: number }>>([]);
+    const smaData = ref<Array<{ date: string; high_24h: number; low_24h: number; ma_10: number; ma_50: number }>>([]);
     const chartInstance = ref<Chart | null>(null);
     const loading = ref(false);
 
@@ -83,9 +83,10 @@ export default {
             end_date: format(endDate, 'yyyy-MM-dd')
           }
         });
-        smaData.value = response.data.map((item: { date: string; high_24h: string; ma_10: string; ma_50: string }) => ({
+        smaData.value = response.data.map((item: { date: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string }) => ({
           date: item.date,
           high_24h: parseFloat(item.high_24h),
+          low_24h: parseFloat(item.low_24h),
           ma_10: parseFloat(item.ma_10),
           ma_50: parseFloat(item.ma_50),
         }));

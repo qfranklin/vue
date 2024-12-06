@@ -65,7 +65,7 @@ export default {
   setup() {
     const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
     const activeCrypto = ref('Bitcoin');
-    const smaData = ref<Array<{ date: string; high_24h: number; sma_50: number; sma_200: number }>>([]);
+    const smaData = ref<Array<{ date: string; high_24h: number; ma_10: number; ma_50: number }>>([]);
     const chartInstance = ref<Chart | null>(null);
     const loading = ref(false);
 
@@ -83,7 +83,12 @@ export default {
             end_date: format(endDate, 'yyyy-MM-dd')
           }
         });
-        smaData.value = response.data;
+        smaData.value = response.data.map((item: { date: string; high_24h: string; ma_10: string; ma_50: string }) => ({
+          date: item.date,
+          high_24h: parseFloat(item.high_24h),
+          ma_10: parseFloat(item.ma_10),
+          ma_50: parseFloat(item.ma_50),
+        }));
         renderChart();
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error);
@@ -112,7 +117,28 @@ export default {
               borderColor: '#333333',
               backgroundColor: '#333333',
               fill: false,
-              pointRadius: 0
+              pointRadius: 0,
+              tension: 0.4 // Smooth line
+            },
+            {
+              label: 'MA 10',
+              data: smaData.value.map(item => item.ma_10),
+              borderColor: 'rgba(51, 51, 51, 0.5)', // Lighter color
+              backgroundColor: 'rgba(51, 51, 51, 0.5)',
+              fill: false,
+              pointRadius: 0,
+              borderWidth: 1, // Thinner line
+              tension: 0.4 // Smooth line
+            },
+            {
+              label: 'MA 50',
+              data: smaData.value.map(item => item.ma_50),
+              borderColor: 'rgba(51, 51, 51, 0.3)', // Lighter color
+              backgroundColor: 'rgba(51, 51, 51, 0.3)',
+              fill: false,
+              pointRadius: 0,
+              borderWidth: 1, // Thinner line
+              tension: 0.4 // Smooth line
             }
           ]
         },
@@ -144,18 +170,32 @@ export default {
               displayColors: false,
               callbacks: {
                 title: function () {
-                  return ''
+                  return ''; // No title
                 },
-                label: function (context) {
-                  const data = smaData.value[context.dataIndex]
-                  const price = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(data.high_24h)
-                  //const sma50 = Math.round(data.sma_50)
-                  //const sma200 = Math.round(data.sma_200)
-                  const date = format(new Date(data.date + 'T00:00:00'), 'EEE, MMM d')
-                  return `${price} ${date}`
-                }
-              }
-            }
+                beforeBody: function (context) {
+                  const index = context[0].dataIndex; // Use the index from the first dataset
+                  const data = smaData.value[index];
+                  const date = format(new Date(data.date + 'T00:00:00'), 'EEE, MMM d');
+                  const price = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(data.high_24h);
+                  const ma10 = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(data.ma_10);
+                  const ma50 = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(data.ma_50);
+
+                  return `${date}\nPrice: ${price}\nMA 10: ${ma10}\nMA 50: ${ma50}`;
+                },
+                label: function () {
+                  return ''; // Remove dataset-specific labels
+                },
+              },
+            },
           }
         }
       })

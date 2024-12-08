@@ -5,13 +5,24 @@
         v-for="crypto in cryptos"
         :key="crypto"
         :class="{ active: activeCrypto === crypto }"
-        @click="fetchCryptoDataDebounced(crypto, false)"
+        @click="fetchCryptoDataDebounced(crypto, activeTime, false)"
         :disabled="loading"
       >
         {{ crypto }}
       </button>
     </div>
     <canvas id="cryptoChart"></canvas>
+    <div class="time-buttons">
+      <button
+        v-for="time in times"
+        :key="time"
+        :class="{ active: activeTime === time }"
+        @click="fetchCryptoDataDebounced(activeCrypto, time, false)"
+        :disabled="loading"
+      >
+        {{ time }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -22,7 +33,7 @@ import { Chart, registerables, Tooltip} from 'chart.js'
 import type { ChartData } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
 import {CandlestickController, CandlestickElement, OhlcElement} from 'chartjs-chart-financial';
-import { subDays, format } from 'date-fns'
+import { format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash';
 
@@ -66,7 +77,9 @@ export default {
   name: 'CryptoChartComponent',
   setup() {
     const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero'];
+    const times = ['hourly', '7d', '30d']
     const activeCrypto = ref('Bitcoin');
+    const activeTime = ref('7d')
     const responseData = ref<Array<{
       date: string;
       current_price: number;
@@ -79,23 +92,24 @@ export default {
     const chartInstance = ref<Chart | null>(null);
     const loading = ref(false);
 
-    const fetchCryptoData = async (crypto: string, pageLoad: boolean) => {
-      if (activeCrypto.value === crypto && !pageLoad) return;
+    const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
+
+      if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return;
+
       loading.value = true;
       activeCrypto.value = crypto;
-      const endDate = new Date();
-      const startDate = subDays(endDate, 30);
+      activeTime.value = time;
+
       try {
         const response = await axios.get(`/api/crypto/get-prices`, {
           params: {
             crypto: crypto.toLowerCase(),
-            start_date: format(startDate, 'yyyy-MM-dd'),
-            end_date: format(endDate, 'yyyy-MM-dd')
+            range: time
           }
         });
 
-        responseData.value = response.data.map((item: { date: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string; }) => ({
-          date: format(new Date(item.date + 'T00:00:00'), 'yyyy-MM-dd'),
+        responseData.value = response.data.map((item: { timestamp: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string; }) => ({
+          date: format(new Date(item.timestamp), 'yyyy-MM-dd'),
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -290,13 +304,15 @@ export default {
     }
 
     onMounted(() => {
-      fetchCryptoDataDebounced(activeCrypto.value, true);
+      fetchCryptoDataDebounced(activeCrypto.value, activeTime.value, true);
     })
 
     return {
       responseData,
       cryptos,
+      times,
       activeCrypto,
+      activeTime,
       fetchCryptoDataDebounced,
       loading
     }
@@ -323,6 +339,25 @@ export default {
 .crypto-buttons button.active {
   background-color: #007bff;
   color: white;
+}
+
+.time-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  justify-content: flex-start;
+}
+
+.time-buttons button {
+  padding: 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.time-buttons button.active {
+  text-decoration: underline;
 }
 
 canvas {

@@ -18,6 +18,7 @@
         :key="time"
         :class="{ active: activeTime === time }"
         @click="fetchCryptoDataDebounced(activeCrypto, time, false)"
+        :disabled="loading"
       >
         {{ time }}
       </button>

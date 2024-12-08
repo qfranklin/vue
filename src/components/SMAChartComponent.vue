@@ -73,7 +73,8 @@ export default {
       high_24h: number;
       low_24h: number;
       ma_10: number;
-      ma_50: number
+      ma_50: number;
+      rsi: number;
     }>>([]);
     const chartInstance = ref<Chart | null>(null);
     const loading = ref(false);
@@ -93,13 +94,14 @@ export default {
           }
         });
 
-        responseData.value = response.data.map((item: { date: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string }) => ({
+        responseData.value = response.data.map((item: { date: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string; }) => ({
           date: format(new Date(item.date + 'T00:00:00'), 'yyyy-MM-dd'),
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
           ma_10: parseFloat(item.ma_10),
           ma_50: parseFloat(item.ma_50),
+          rsi: parseFloat(item.rsi)
         }));
         renderChart();
       } catch (error) {
@@ -140,6 +142,11 @@ export default {
         y: item.ma_50,
       }));
 
+      const rsiData = responseData.value.map(item => ({
+        x: new Date(item.date + 'T00:00:00Z').getTime(), // Use UTC time
+        y: item.rsi,
+      }));
+
       const chartData: ChartData = {
         labels: responseData.value.map(item => item.date),
         datasets: [
@@ -171,6 +178,18 @@ export default {
             pointRadius: 0,
             borderWidth: 1, // Thinner line
             tension: 0.4 // Smooth line
+          },
+          {
+            label: 'RSI',
+            type: 'line',
+            data: rsiData,
+            borderColor: 'rgba(255, 99, 132, 1)', // Red color for RSI
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 1, // Thinner line
+            tension: 0.4, // Smooth line
+            yAxisID: 'y-rsi', // Use a separate y-axis for RSI
           }
         ]
       }
@@ -188,7 +207,29 @@ export default {
               beginAtZero: false,
               min: Math.min(...low24hValues) - 1000, // Adjust min value
               max: Math.max(...high24hValues) + 1000, // Adjust max value
-            }
+            },
+            'y-rsi': {
+              position: 'right',
+              beginAtZero: false,
+              min: 0,
+              max: 100,
+              ticks: {
+                // Only at 30 and 70
+                callback: function (value) {
+                  return value === 30 || value === 70 ? value : '';
+                },
+              },
+              grid: {
+                // Only draw grid lines at 30 and 70
+                drawTicks: true,
+                drawOnChartArea: true,
+                color: (context) => {
+                  return context.tick.value === 30 || context.tick.value === 70
+                    ? 'rgba(0, 0, 0, 0.4)' // Grid line color at 30 and 70
+                    : 'transparent'; // Hide other grid lines
+                },
+              },
+            },
           },
           interaction: {
             intersect: false,
@@ -231,8 +272,12 @@ export default {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   }).format(data.ma_50);
+                  const rsi = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }).format(data.rsi);
 
-                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\n5am EST: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}`;
+                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\n5am EST: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}\nRSI: ${rsi}`;
                 },
                 label: function () {
                   return ''; // Remove dataset-specific labels

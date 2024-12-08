@@ -1,29 +1,31 @@
 <template>
-  <div>
+  <div class="button-container">
     <div class="crypto-buttons">
       <button
-        v-for="crypto in cryptos"
-        :key="crypto"
-        :class="{ active: activeCrypto === crypto }"
-        @click="fetchCryptoDataDebounced(crypto, activeTime, false)"
+        v-for="(valueCrypto, displayCrypto) in cryptoMapping"
+        :key="valueCrypto"
+        :class="{ active: activeCrypto === valueCrypto }"
+        @click="fetchCryptoDataDebounced(valueCrypto, activeTime, false)"
         :disabled="loading"
       >
-        {{ crypto }}
+        {{ displayCrypto }}
       </button>
     </div>
-    <canvas id="cryptoChart"></canvas>
+
     <div class="time-buttons">
       <button
-        v-for="time in times"
-        :key="time"
-        :class="{ active: activeTime === time }"
-        @click="fetchCryptoDataDebounced(activeCrypto, time, false)"
+        v-for="(valueTime, displayTime) in timeMapping"
+        :key="valueTime"
+        :class="{ active: activeTime === valueTime }"
+        @click="fetchCryptoDataDebounced(activeCrypto, valueTime, false)"
         :disabled="loading"
       >
-        {{ time }}
+        {{ displayTime }}
       </button>
     </div>
+
   </div>
+  <canvas id="cryptoChart"></canvas>
 </template>
 
 <script lang="ts">
@@ -70,9 +72,20 @@ Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPositi
 export default {
   name: 'SMAChartComponent',
   setup() {
-    const cryptos = ['Bitcoin', 'Ethereum', 'Solana', 'Monero']
-    const times = ['hourly', '7d', '30d']
-    const activeCrypto = ref('Bitcoin')
+    const cryptoMapping = {
+      BTC: 'bitcoin',
+      ETH: 'ethereum',
+      SOL: 'solana',
+      XMR: 'monero',
+    }
+    const cryptos = Object.values(cryptoMapping)
+    const timeMapping = {
+      '24h': 'hourly',
+      '7d': '7d',
+      '30d': '30d',
+    }
+    const times = Object.values(timeMapping)
+    const activeCrypto = ref('bitcoin')
     const activeTime = ref('7d')
     const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
     const chartInstance = ref<Chart | null>(null)
@@ -197,6 +210,9 @@ export default {
               beginAtZero: false,
               min: Math.min(...low24hValues) - 1000,
               max: Math.max(...high24hValues) + 1000,
+              ticks: {
+                display: false
+              }
             },
             'y-rsi': {
               position: 'right',
@@ -204,9 +220,7 @@ export default {
               min: 0,
               max: 100,
               ticks: {
-                callback: function (value) {
-                  return value === 30 || value === 70 ? value : ''
-                },
+                display: false
               },
               grid: {
                 drawTicks: true,
@@ -281,7 +295,9 @@ export default {
 
     return {
       responseData,
+      cryptoMapping,
       cryptos,
+      timeMapping,
       times,
       activeCrypto,
       activeTime,
@@ -293,43 +309,33 @@ export default {
 </script>
 
 <style scoped>
-.crypto-buttons {
+
+.button-container {
   display: flex;
-  gap: 5px;
-  margin-bottom: 10px;
-}
-
-.crypto-buttons button {
-  padding: 5px;
-  border: none;
-  border-radius: 4px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.crypto-buttons button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.time-buttons {
-  display: flex;
-  gap: 5px;
+  justify-content: space-between;
   margin-top: 10px;
-  justify-content: flex-start;
 }
 
-.time-buttons button {
-  padding: 5px;
+.crypto-buttons button, .time-buttons button {
   border: none;
   background: none;
   cursor: pointer;
   transition: color 0.3s;
+  padding: 3px;
 }
 
-.time-buttons button.active {
+.crypto-buttons button {
+  font-size: 16px;
+}
+
+.crypto-buttons button.active, .time-buttons button.active {
+  color: blue;
   text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.time-buttons, .crypto-buttons {
+  display: flex;
 }
 
 canvas {

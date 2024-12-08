@@ -106,7 +106,7 @@ export default {
         })
 
         responseData.value = response.data.map((item: { timestamp: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string }) => ({
-          date: time === 'hourly' ? format(new Date(item.timestamp), 'yyyy-MM-dd HH:mm:ss') : format(new Date(item.timestamp), 'yyyy-MM-dd'),
+          date: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd'),
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -204,7 +204,10 @@ export default {
           responsive: true,
           scales: {
             x: {
-              display: false,
+              display: true,
+              ticks: {
+                autoSkip: false,
+              }
             },
             y: {
               beginAtZero: false,
@@ -251,7 +254,7 @@ export default {
                 beforeBody: function (context) {
                   const index = context[0].dataIndex
                   const data = responseData.value[index]
-                  const date = format(new Date(data.date), 'EEE, MMM d HH:mm:ss')
+                  const date = activeTime.value === 'hourly' ? format(new Date(data.date), 'ha').toLowerCase() : format(new Date(data.date), 'EEE, MMM d');
                   const highPrice = new Intl.NumberFormat('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -277,7 +280,7 @@ export default {
                     maximumFractionDigits: 2,
                   }).format(data.rsi)
 
-                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\n5am EST: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}\nRSI: ${rsi}`
+                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\nOpen: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}\nRSI: ${rsi}`
                 },
                 label: function () {
                   return ''

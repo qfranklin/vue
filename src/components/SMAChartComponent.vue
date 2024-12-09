@@ -91,6 +91,7 @@ export default {
     const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
+    const selectedDataPoint = ref<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number } | null>(null)
 
     const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
@@ -250,8 +251,8 @@ export default {
                   return;
                 }
 
-                // Hide tooltip if no data
-                if (context.tooltip.opacity === 0) {
+                // Hide tooltip if no data and no data point is selected
+                if (context.tooltip.opacity === 0 && !selectedDataPoint.value) {
                   tooltipEl.style.opacity = '0';
                   return;
                 }
@@ -279,6 +280,9 @@ export default {
 
                 // Ensure tooltip is visible
                 tooltipEl.style.opacity = '1';
+
+                // Update selected data point
+                selectedDataPoint.value = data;
               },
             },
           },
@@ -300,6 +304,7 @@ export default {
       activeTime,
       fetchCryptoDataDebounced,
       loading,
+      selectedDataPoint,
     }
   },
 }

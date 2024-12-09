@@ -108,7 +108,7 @@ export default {
         })
 
         responseData.value = response.data.map((item: { timestamp: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string }) => ({
-          date: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd'),
+          date: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : item.timestamp,
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -261,14 +261,19 @@ export default {
                 const index = context.tooltip.dataPoints[0].dataIndex;
                 const data = responseData.value[index];
 
+                if(activeTime.value === 'hourly') {
+                  data.date = format(new Date(data.date), 'ha').toLowerCase()
+                }
+                else{
+                  const date = new Date(data.date)
+                  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                  data.date = format(utcDate, 'EEE, MMM d')
+                }
+
                 // Set content dynamically
                 tooltipEl.innerHTML = `
                   <div>
-                    <p><strong>Date:</strong> ${
-                      activeTime.value === 'hourly'
-                        ? format(new Date(data.date), 'ha').toLowerCase()
-                        : format(new Date(data.date), 'EEE, MMM d')
-                    }</p>
+                    <p><strong>Date:</strong> ${data.date}</p>
                     <p><strong>High:</strong> ${data.high_24h.toFixed(2)}</p>
                     <p><strong>Low:</strong> ${data.low_24h.toFixed(2)}</p>
                     <p><strong>Current Price:</strong> ${data.current_price.toFixed(2)}</p>

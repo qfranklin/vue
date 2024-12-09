@@ -343,4 +343,8 @@ export default {
 canvas {
   max-width: 100%;
 }
+
+body {
+    background-color: #f5f5f5;
+}
 </style>

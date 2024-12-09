@@ -204,18 +204,13 @@ export default {
           responsive: true,
           scales: {
             x: {
-              display: true,
-              ticks: {
-                autoSkip: false,
-              }
+              display: false
             },
             y: {
               beginAtZero: false,
               min: Math.min(...low24hValues) - 1000,
               max: Math.max(...high24hValues) + 1000,
-              ticks: {
-                display: false
-              }
+              display: false
             },
             'y-rsi': {
               position: 'right',

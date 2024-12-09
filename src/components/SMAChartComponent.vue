@@ -26,6 +26,7 @@
 
   </div>
   <canvas id="cryptoChart"></canvas>
+  <div id="chartTooltip" class="chart-tooltip"></div>
 </template>
 
 <script lang="ts">
@@ -239,47 +240,45 @@ export default {
               display: false,
             },
             tooltip: {
-              position: 'custom',
-              caretSize: 0,
-              displayColors: false,
-              callbacks: {
-                title: function () {
-                  return ''
-                },
-                beforeBody: function (context) {
-                  const index = context[0].dataIndex
-                  const data = responseData.value[index]
-                  const date = activeTime.value === 'hourly' ? format(new Date(data.date), 'ha').toLowerCase() : format(new Date(data.date), 'EEE, MMM d');
-                  const highPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.high_24h)
-                  const lowPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.low_24h)
-                  const currentPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.current_price)
-                  const ma10 = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.ma_10)
-                  const ma50 = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.ma_50)
-                  const rsi = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.rsi)
+              enabled: false, // Disable the default tooltip rendering
+              external: function (context) {
+                const tooltipEl = document.getElementById('chartTooltip');
 
-                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\nOpen: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}\nRSI: ${rsi}`
-                },
-                label: function () {
-                  return ''
-                },
+                // Handle null case
+                if (!tooltipEl) {
+                  console.warn('Tooltip element not found.');
+                  return;
+                }
+
+                // Hide tooltip if no data
+                if (context.tooltip.opacity === 0) {
+                  tooltipEl.style.opacity = '0';
+                  return;
+                }
+
+                // Get the data for the tooltip
+                const index = context.tooltip.dataPoints[0].dataIndex;
+                const data = responseData.value[index];
+
+                // Set content dynamically
+                tooltipEl.innerHTML = `
+                  <div>
+                    <p><strong>Date:</strong> ${
+                      activeTime.value === 'hourly'
+                        ? format(new Date(data.date), 'ha').toLowerCase()
+                        : format(new Date(data.date), 'EEE, MMM d')
+                    }</p>
+                    <p><strong>High:</strong> ${data.high_24h.toFixed(2)}</p>
+                    <p><strong>Low:</strong> ${data.low_24h.toFixed(2)}</p>
+                    <p><strong>Current Price:</strong> ${data.current_price.toFixed(2)}</p>
+                    <p><strong>MA 10:</strong> ${data.ma_10.toFixed(2)}</p>
+                    <p><strong>MA 50:</strong> ${data.ma_50.toFixed(2)}</p>
+                    <p><strong>RSI:</strong> ${data.rsi.toFixed(2)}</p>
+                  </div>
+                `;
+
+                // Ensure tooltip is visible
+                tooltipEl.style.opacity = '1';
               },
             },
           },

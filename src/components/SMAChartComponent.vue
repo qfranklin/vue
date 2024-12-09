@@ -26,6 +26,7 @@
 
   </div>
   <canvas id="cryptoChart"></canvas>
+  <div id="chartTooltip" class="chart-tooltip"></div>
 </template>
 
 <script lang="ts">
@@ -90,6 +91,7 @@ export default {
     const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
+    const selectedDataPoint = ref<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number } | null>(null)
 
     const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
@@ -204,18 +206,13 @@ export default {
           responsive: true,
           scales: {
             x: {
-              display: true,
-              ticks: {
-                autoSkip: false,
-              }
+              display: false
             },
             y: {
               beginAtZero: false,
               min: Math.min(...low24hValues) - 1000,
               max: Math.max(...high24hValues) + 1000,
-              ticks: {
-                display: false
-              }
+              display: false
             },
             'y-rsi': {
               position: 'right',
@@ -244,47 +241,48 @@ export default {
               display: false,
             },
             tooltip: {
-              position: 'custom',
-              caretSize: 0,
-              displayColors: false,
-              callbacks: {
-                title: function () {
-                  return ''
-                },
-                beforeBody: function (context) {
-                  const index = context[0].dataIndex
-                  const data = responseData.value[index]
-                  const date = activeTime.value === 'hourly' ? format(new Date(data.date), 'ha').toLowerCase() : format(new Date(data.date), 'EEE, MMM d');
-                  const highPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.high_24h)
-                  const lowPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.low_24h)
-                  const currentPrice = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.current_price)
-                  const ma10 = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.ma_10)
-                  const ma50 = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.ma_50)
-                  const rsi = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(data.rsi)
+              enabled: false, // Disable the default tooltip rendering
+              external: function (context) {
+                const tooltipEl = document.getElementById('chartTooltip');
 
-                  return `${date}\nHigh: ${highPrice}\nLow: ${lowPrice}\nOpen: ${currentPrice}\nMA 10: ${ma10}\nMA 50: ${ma50}\nRSI: ${rsi}`
-                },
-                label: function () {
-                  return ''
-                },
+                // Handle null case
+                if (!tooltipEl) {
+                  console.warn('Tooltip element not found.');
+                  return;
+                }
+
+                // Hide tooltip if no data and no data point is selected
+                if (context.tooltip.opacity === 0 && !selectedDataPoint.value) {
+                  tooltipEl.style.opacity = '0';
+                  return;
+                }
+
+                // Get the data for the tooltip
+                const index = context.tooltip.dataPoints[0].dataIndex;
+                const data = responseData.value[index];
+
+                // Set content dynamically
+                tooltipEl.innerHTML = `
+                  <div>
+                    <p><strong>Date:</strong> ${
+                      activeTime.value === 'hourly'
+                        ? format(new Date(data.date), 'ha').toLowerCase()
+                        : format(new Date(data.date), 'EEE, MMM d')
+                    }</p>
+                    <p><strong>High:</strong> ${data.high_24h.toFixed(2)}</p>
+                    <p><strong>Low:</strong> ${data.low_24h.toFixed(2)}</p>
+                    <p><strong>Current Price:</strong> ${data.current_price.toFixed(2)}</p>
+                    <p><strong>MA 10:</strong> ${data.ma_10.toFixed(2)}</p>
+                    <p><strong>MA 50:</strong> ${data.ma_50.toFixed(2)}</p>
+                    <p><strong>RSI:</strong> ${data.rsi.toFixed(2)}</p>
+                  </div>
+                `;
+
+                // Ensure tooltip is visible
+                tooltipEl.style.opacity = '1';
+
+                // Update selected data point
+                selectedDataPoint.value = data;
               },
             },
           },
@@ -306,6 +304,7 @@ export default {
       activeTime,
       fetchCryptoDataDebounced,
       loading,
+      selectedDataPoint,
     }
   },
 }

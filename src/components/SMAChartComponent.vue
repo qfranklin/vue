@@ -117,6 +117,7 @@ export default {
           rsi: parseFloat(item.rsi),
         }))
 
+
         renderChart()
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error)
@@ -126,6 +127,38 @@ export default {
     }
 
     const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300)
+
+    const displayTooltip = (data: { date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }) => {
+      const tooltipEl = document.getElementById('chartTooltip')
+      if (!tooltipEl) {
+        console.warn('Tooltip element not found.')
+        return
+      }
+
+      console.log(data)
+
+      if(activeTime.value === 'hourly') {
+        data.date = format(new Date(data.date), 'ha').toLowerCase()
+      }
+      else{
+        const date = new Date(data.date)
+        const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+        data.date = format(utcDate, 'MM/dd')
+      }
+
+      tooltipEl.innerHTML = `
+        <div>
+          <p>${data.date}</p>
+          <p><strong>Price:</strong> ${data.current_price.toFixed(2)}</p>
+          <p><strong>24h High:</strong> ${data.high_24h.toFixed(2)}</p>
+          <p><strong>24h Low:</strong> ${data.low_24h.toFixed(2)}</p>
+          <p><strong>MA 10:</strong> ${data.ma_10.toFixed(2)}</p>
+          <p><strong>MA 50:</strong> ${data.ma_50.toFixed(2)}</p>
+          <p><strong>RSI:</strong> ${data.rsi.toFixed(2)}</p>
+        </div>
+      `
+      tooltipEl.style.opacity = '1'
+    }
 
     const renderChart = () => {
       const canvas = document.getElementById('cryptoChart') as HTMLCanvasElement
@@ -294,6 +327,12 @@ export default {
           },
         },
       })
+
+      // Set the selected data point to the latest data point and display the tooltip
+      if (responseData.value.length > 0) {
+        selectedDataPoint.value = responseData.value[responseData.value.length - 1]
+        displayTooltip(selectedDataPoint.value)
+      }
     }
 
     onMounted(() => {

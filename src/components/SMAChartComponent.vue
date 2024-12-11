@@ -26,7 +26,7 @@
 
   </div>
   <canvas id="cryptoChart"></canvas>
-  <div id="chartTooltip" class="chart-tooltip"></div>
+  <div id="chartTooltip"></div>
 </template>
 
 <script lang="ts">
@@ -137,24 +137,24 @@ export default {
 
       console.log(data)
 
-      if(activeTime.value === 'hourly') {
-        data.date = format(new Date(data.date), 'ha').toLowerCase()
-      }
-      else{
+      let formattedDate;
+      if (activeTime.value === 'hourly') {
+        formattedDate = format(new Date(data.date), 'ha').toLowerCase()
+      } else {
         const date = new Date(data.date)
-        const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-        data.date = format(utcDate, 'MM/dd')
+        const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+        formattedDate = format(utcDate, 'MM/dd')
       }
 
       tooltipEl.innerHTML = `
-        <div>
-          <p>${data.date}</p>
-          <p><strong>Price:</strong> ${data.current_price.toFixed(2)}</p>
-          <p><strong>24h High:</strong> ${data.high_24h.toFixed(2)}</p>
-          <p><strong>24h Low:</strong> ${data.low_24h.toFixed(2)}</p>
-          <p><strong>MA 10:</strong> ${data.ma_10.toFixed(2)}</p>
-          <p><strong>MA 50:</strong> ${data.ma_50.toFixed(2)}</p>
-          <p><strong>RSI:</strong> ${data.rsi.toFixed(2)}</p>
+        <div class="tooltip-content">
+          <p class="tooltip-date">${formattedDate}</p>
+          <p class="tooltip-item"><span class="tooltip-label">Price:</span> ${data.current_price.toFixed(2)}</p>
+          <p class="tooltip-item"><span class="tooltip-label">24h High:</span> ${data.high_24h.toFixed(2)}</p>
+          <p class="tooltip-item"><span class="tooltip-label">24h Low:</span> ${data.low_24h.toFixed(2)}</p>
+          <p class="tooltip-item"><span class="tooltip-label">MA 10:</span> ${data.ma_10.toFixed(2)}</p>
+          <p class="tooltip-item"><span class="tooltip-label">MA 50:</span> ${data.ma_50.toFixed(2)}</p>
+          <p class="tooltip-item"><span class="tooltip-label">RSI:</span> ${data.rsi.toFixed(2)}</p>
         </div>
       `
       tooltipEl.style.opacity = '1'
@@ -295,33 +295,7 @@ export default {
                 const index = context.tooltip.dataPoints[0].dataIndex;
                 const data = responseData.value[index];
 
-                if(activeTime.value === 'hourly') {
-                  data.date = format(new Date(data.date), 'ha').toLowerCase()
-                }
-                else{
-                  const date = new Date(data.date)
-                  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-                  data.date = format(utcDate, 'MM/dd')
-                }
-
-                // Set content dynamically
-                tooltipEl.innerHTML = `
-                  <div>
-                    <p>${data.date}</p>
-                    <p><strong>Price:</strong> ${data.current_price.toFixed(2)}</p>
-                    <p><strong>24h High:</strong> ${data.high_24h.toFixed(2)}</p>
-                    <p><strong>24h Low:</strong> ${data.low_24h.toFixed(2)}</p>
-                    <p><strong>MA 10:</strong> ${data.ma_10.toFixed(2)}</p>
-                    <p><strong>MA 50:</strong> ${data.ma_50.toFixed(2)}</p>
-                    <p><strong>RSI:</strong> ${data.rsi.toFixed(2)}</p>
-                  </div>
-                `;
-
-                // Ensure tooltip is visible
-                tooltipEl.style.opacity = '1';
-
-                // Update selected data point
-                selectedDataPoint.value = data;
+                displayTooltip(data)
               },
             },
           },
@@ -355,7 +329,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 
 .button-container {
   display: flex;
@@ -391,5 +365,31 @@ canvas {
 
 body {
     background-color: #f5f5f5;
+}
+
+.tooltip-content {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  max-width: 200px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+.tooltip-date {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.tooltip-item {
+  margin: 5px 0;
+}
+
+.tooltip-label {
+  font-weight: bold;
+  color: #555;
 }
 </style>

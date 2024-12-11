@@ -135,8 +135,6 @@ export default {
         return
       }
 
-      console.log(data)
-
       let formattedDate;
       if (activeTime.value === 'hourly') {
         formattedDate = format(new Date(data.date), 'ha').toLowerCase()

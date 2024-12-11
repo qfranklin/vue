@@ -87,7 +87,7 @@ export default {
     }
     const times = Object.values(timeMapping)
     const activeCrypto = ref('bitcoin')
-    const activeTime = ref('7d')
+    const activeTime = ref('hourly')
     const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)

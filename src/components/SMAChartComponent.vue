@@ -36,6 +36,7 @@ import { Chart, registerables, Tooltip } from 'chart.js'
 import type { ChartData } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
 import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
+import annotationPlugin from 'chartjs-plugin-annotation';
 import { format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash'
@@ -46,7 +47,7 @@ declare module 'chart.js' {
   }
 }
 
-Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcElement)
+Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcElement, annotationPlugin)
 
 Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) {
   const pos = Tooltip.positioners.average.call(this as unknown as TooltipModel<'line'>, items as unknown as ActiveElement[], eventPosition)
@@ -92,6 +93,34 @@ export default {
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
     const selectedDataPoint = ref<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number } | null>(null)
+    let isUpdatingAnnotation = false;
+
+    const updateAnnotation = () => {
+      if (isUpdatingAnnotation) return;
+      isUpdatingAnnotation = true;
+
+      if (chartInstance.value) {
+
+        const annotation = chartInstance.value.options.plugins.annotation.annotations.activeLine;
+
+        if (annotation && selectedDataPoint.value) {
+          const newX = new Date(selectedDataPoint.value.date).getTime();
+          console.log('Current annotation:', annotation.xMin, annotation.xMax);
+          console.log('New annotation:', newX);
+
+
+          if (annotation.xMin !== newX || annotation.xMax !== newX) {
+            console.log('Updating annotation:', newX);
+            annotation.xMin = newX;
+            annotation.xMax = newX;
+
+            chartInstance.value.update();
+          }
+        }
+      }
+
+      isUpdatingAnnotation = false;
+    };
 
     const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
@@ -156,6 +185,8 @@ export default {
         </div>
       `
       tooltipEl.style.opacity = '1'
+
+      updateAnnotation()
     }
 
     const renderChart = () => {
@@ -296,6 +327,18 @@ export default {
                 displayTooltip(data)
               },
             },
+            annotation: {
+              annotations: {
+                activeLine: {
+                  type: 'line',
+                  xMin: selectedDataPoint.value ? new Date(selectedDataPoint.value.date).getTime() : null,
+                  xMax: selectedDataPoint.value ? new Date(selectedDataPoint.value.date).getTime() : null,
+                  borderColor: 'rgba(0, 0, 255, 0.5)',
+                  borderWidth: 2,
+                  borderDash: [6, 6],
+                },
+              },
+            },
           },
         },
       })
@@ -322,6 +365,8 @@ export default {
       fetchCryptoDataDebounced,
       loading,
       selectedDataPoint,
+      updateAnnotation,
+      fetchCryptoData
     }
   },
 }

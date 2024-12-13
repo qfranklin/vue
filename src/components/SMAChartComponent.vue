@@ -78,6 +78,7 @@ export default {
       ETH: 'ethereum',
       SOL: 'solana',
       XMR: 'monero',
+      PAXG: 'paxg',
     }
     const cryptos = Object.values(cryptoMapping)
     const timeMapping = {

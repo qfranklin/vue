@@ -243,8 +243,8 @@ export default {
             },
             y: {
               beginAtZero: false,
-              min: Math.min(...low24hValues) - 1000,
-              max: Math.max(...high24hValues) + 1000,
+              min: Math.min(...low24hValues) * 0.95,
+              max: Math.max(...high24hValues) * 1.05,
               display: false
             },
             'y-rsi': {

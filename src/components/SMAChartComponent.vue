@@ -26,7 +26,35 @@
 
   </div>
   <canvas id="cryptoChart"></canvas>
-  <div id="chartTooltip"></div>
+  <div id="chartTooltip" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
+    <div class="tooltip-content">
+      <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">Price:</span>
+        {{ tooltipState.data.current_price.toFixed(2) }}
+      </p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">24h High:</span>
+        {{ tooltipState.data.high_24h.toFixed(2) }}
+      </p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">24h Low:</span>
+        {{ tooltipState.data.low_24h.toFixed(2) }}
+      </p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">MA 10:</span>
+        {{ tooltipState.data.ma_10.toFixed(2) }}
+      </p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">MA 50:</span>
+        {{ tooltipState.data.ma_50.toFixed(2) }}
+      </p>
+      <p class="tooltip-item">
+        <span class="tooltip-label">RSI:</span>
+        {{ tooltipState.data.rsi.toFixed(2) }}
+      </p>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -95,6 +123,11 @@ interface ApiResponseItem {
   ma_50: string;
   rsi: string;
 }
+interface TooltipData {
+  isVisible: boolean;
+  formattedDate: string;
+  data: CryptoDataPoint | null;
+}
 
 type CryptoType = typeof CRYPTO_MAPPING[keyof typeof CRYPTO_MAPPING]
 type TimeType = typeof TIME_MAPPING[keyof typeof TIME_MAPPING]
@@ -121,6 +154,20 @@ export default {
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
+
+    const tooltipState = ref<TooltipData>({
+      isVisible: false,
+      formattedDate: '',
+      data: null
+    })
+    const formatDate = (timestamp: string, timeFormat: TimeType): string => {
+      if (timeFormat === 'hourly') {
+        return format(new Date(timestamp), 'ha').toLowerCase()
+      }
+      const date = new Date(timestamp)
+      const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+      return format(utcDate, 'MM/dd')
+    }
 
     const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
@@ -158,33 +205,11 @@ export default {
     const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300)
 
     const displayTooltip = (data: CryptoDataPoint) => {
-      const tooltipEl = document.getElementById('chartTooltip')
-      if (!tooltipEl) {
-        console.warn('Tooltip element not found.')
-        return
+      tooltipState.value = {
+        isVisible: true,
+        formattedDate: formatDate(data.timestamp, activeTime.value),
+        data
       }
-
-      let formattedDate;
-      if (activeTime.value === 'hourly') {
-        formattedDate = format(new Date(data.timestamp), 'ha').toLowerCase()
-      } else {
-        const date = new Date(data.timestamp)
-        const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
-        formattedDate = format(utcDate, 'MM/dd')
-      }
-
-      tooltipEl.innerHTML = `
-        <div class="tooltip-content">
-          <p class="tooltip-date">${formattedDate}</p>
-          <p class="tooltip-item"><span class="tooltip-label">Price:</span> ${data.current_price.toFixed(2)}</p>
-          <p class="tooltip-item"><span class="tooltip-label">24h High:</span> ${data.high_24h.toFixed(2)}</p>
-          <p class="tooltip-item"><span class="tooltip-label">24h Low:</span> ${data.low_24h.toFixed(2)}</p>
-          <p class="tooltip-item"><span class="tooltip-label">MA 10:</span> ${data.ma_10.toFixed(2)}</p>
-          <p class="tooltip-item"><span class="tooltip-label">MA 50:</span> ${data.ma_50.toFixed(2)}</p>
-          <p class="tooltip-item"><span class="tooltip-label">RSI:</span> ${data.rsi.toFixed(2)}</p>
-        </div>
-      `
-      tooltipEl.style.opacity = '1'
     }
 
     const renderChart = () => {
@@ -349,7 +374,8 @@ export default {
       fetchCryptoDataDebounced,
       loading,
       selectedDataPoint,
-      fetchCryptoData
+      fetchCryptoData,
+      tooltipState
     }
   },
 }

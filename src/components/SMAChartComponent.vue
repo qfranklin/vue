@@ -87,7 +87,7 @@
           MA 50
         </span>
       </div>
-      
+
     </div>
   </div>
 </template>
@@ -373,6 +373,9 @@ export default {
                     : 'transparent'
                 },
               },
+              border: {
+                display: false
+              },
             },
           },
           interaction: {
@@ -484,6 +487,11 @@ export default {
             dataset.hidden = !showRSI.value
           }
         })
+
+        if (chartInstance.options.scales && chartInstance.options.scales['y-rsi']) {
+          chartInstance.options.scales['y-rsi'].display = showRSI.value
+        }
+
         chartInstance.update('none')
       }
     }

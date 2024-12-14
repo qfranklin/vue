@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="notes">
     <button v-if="!showTextBox" @click="showTextBox = true" class="notes-button">Add notes</button>
     <div v-else>
       <textarea v-model="newNote" ref="noteTextBox" class="notes-textbox"></textarea>
@@ -73,6 +73,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+
+.notes {
+  margin-top: 1rem;
+}
+
 .notes-button {
   color: #007bff;
   background: none;

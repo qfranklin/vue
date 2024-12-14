@@ -12,7 +12,7 @@
 import { defineComponent, computed } from 'vue'
 import NotesComponent from '@/components/NotesComponent.vue'
 import SMAChartComponent from '@/components/SMAChartComponent.vue'
-import LifepathComponent from '@/components/LifepathComponent.vue'
+//import LifepathComponent from '@/components/LifepathComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
@@ -20,7 +20,7 @@ export default defineComponent({
   components: {
     NotesComponent,
     SMAChartComponent,
-    LifepathComponent
+    //LifepathComponent
   },
   setup() {
     const userStore = useUserStore()

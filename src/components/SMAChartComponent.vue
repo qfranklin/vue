@@ -1,65 +1,100 @@
 <template>
-  <div class="button-container">
-    <div class="crypto-buttons">
-      <button
-        v-for="(valueCrypto, displayCrypto) in cryptoMapping"
-        :key="valueCrypto"
-        :class="{ active: activeCrypto === valueCrypto }"
-        @click="handleCryptoClick(valueCrypto)"
-        :disabled="loading"
-      >
-        {{ displayCrypto }}
-      </button>
+  <div class="chart-container">
+    <div class="top-container">
+      <div class="crypto-buttons">
+        <button
+          v-for="(valueCrypto, displayCrypto) in cryptoMapping"
+          :key="valueCrypto"
+          :class="{ active: activeCrypto === valueCrypto }"
+          @click="handleCryptoClick(valueCrypto)"
+          :disabled="loading"
+        >
+          {{ displayCrypto }}
+        </button>
+      </div>
+
+      <div class="time-buttons">
+        <button
+          v-for="(valueTime, displayTime) in timeMapping"
+          :key="valueTime"
+          :class="{ active: activeTime === valueTime }"
+          @click="handleTimeClick(valueTime)"
+          :disabled="loading"
+        >
+          {{ displayTime }}
+        </button>
+      </div>
+
     </div>
 
-    <div class="time-buttons">
-      <button
-        v-for="(valueTime, displayTime) in timeMapping"
-        :key="valueTime"
-        :class="{ active: activeTime === valueTime }"
-        @click="handleTimeClick(valueTime)"
-        :disabled="loading"
-      >
-        {{ displayTime }}
-      </button>
-    </div>
+    <canvas id="cryptoChart"></canvas>
 
-  </div>
-  <canvas id="cryptoChart"></canvas>
-  <div id="chartTooltip" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
-    <div class="tooltip-content">
-      <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">Price:</span>
-        {{ tooltipState.data.current_price.toFixed(2) }}
-      </p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">24h High:</span>
-        {{ tooltipState.data.high_24h.toFixed(2) }}
-      </p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">24h Low:</span>
-        {{ tooltipState.data.low_24h.toFixed(2) }}
-      </p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">MA 10:</span>
-        {{ tooltipState.data.ma_10.toFixed(2) }}
-      </p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">MA 50:</span>
-        {{ tooltipState.data.ma_50.toFixed(2) }}
-      </p>
-      <p class="tooltip-item">
-        <span class="tooltip-label">RSI:</span>
-        {{ tooltipState.data.rsi.toFixed(2) }}
-      </p>
+    <div class="bottom-container">
+
+      <div id="chartTooltip" class="tooltip-container" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
+        <div class="tooltip-content">
+          <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">Price:</span>
+            {{ tooltipState.data.current_price.toFixed(2) }}
+          </p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">24h High:</span>
+            {{ tooltipState.data.high_24h.toFixed(2) }}
+          </p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">24h Low:</span>
+            {{ tooltipState.data.low_24h.toFixed(2) }}
+          </p>
+          <p v-if="showMA10" class="tooltip-item">
+            <span class="tooltip-label">MA10:</span>
+            {{ tooltipState.data.ma_10.toFixed(2) }}
+          </p>
+          <p v-if="showMA50" class="tooltip-item">
+            <span class="tooltip-label">MA50:</span>
+            {{ tooltipState.data.ma_50.toFixed(2) }}
+          </p>
+          <p v-if="showRSI" class="tooltip-item">
+            <span class="tooltip-label">RSI:</span>
+            {{ tooltipState.data.rsi.toFixed(2) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="chart-toggles">
+        <span
+          :class="{ hidden: !showPrice }"
+          @click="showPrice = !showPrice"
+        >
+          Price
+        </span>
+        <span
+          :class="{ hidden: !showRSI }"
+          @click="showRSI = !showRSI"
+        >
+          RSI
+        </span>
+        <span
+          :class="{ hidden: !showMA10 }"
+          @click="showMA10 = !showMA10"
+        >
+          MA10
+        </span>
+        <span
+          :class="{ hidden: !showMA50 }"
+          @click="showMA50 = !showMA50"
+        >
+          MA50
+        </span>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { Chart, registerables, Tooltip } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
@@ -129,8 +164,13 @@ export default {
     const activeTime: Ref<TimeType> = ref('hourly')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
-    const chartInstance = ref<Chart | null>(null)
+    let chartInstance: Chart | null = null
     const loading = ref(false)
+
+    const showPrice = ref(true)
+    const showRSI = ref(true)
+    const showMA10 = ref(false)
+    const showMA50 = ref(false)
 
     const fetchCryptoDataDebounced = debounce(
       (params: FetchCryptoDataParams) => fetchCryptoData(params),
@@ -191,10 +231,11 @@ export default {
         }));
 
 
-        if (chartInstance.value) {
-          chartInstance.value.destroy();
+        if (chartInstance) {
+          updateChartData();
+        } else {
+          renderChart();
         }
-        renderChart();
 
         if (responseData.value.length > 0) {
           displayTooltip(responseData.value[responseData.value.length - 1]);
@@ -253,6 +294,7 @@ export default {
               })),
               borderColor: '#333333',
               backgroundColor: '#333333',
+              hidden: !showPrice.value,
             },
             {
               label: 'MA 10',
@@ -267,6 +309,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showMA10.value,
             },
             {
               label: 'MA 50',
@@ -281,6 +324,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showMA50.value,
             },
             {
               label: 'RSI',
@@ -296,6 +340,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showRSI.value,
             },
           ],
         },
@@ -328,6 +373,9 @@ export default {
                     : 'transparent'
                 },
               },
+              border: {
+                display: false
+              },
             },
           },
           interaction: {
@@ -356,7 +404,7 @@ export default {
         },
       }
 
-      chartInstance.value = new Chart(ctx, chartConfiguration)
+      chartInstance = new Chart(ctx, chartConfiguration)
     }
 
     const handleCryptoClick = (crypto: CryptoType) => {
@@ -383,6 +431,73 @@ export default {
       })
     })
 
+    const updateChartData = () => {
+      if (chartInstance) {
+
+        const low24hValues = responseData.value.map(item => item.low_24h);
+        const high24hValues = responseData.value.map(item => item.high_24h);
+
+        chartInstance.data.labels = responseData.value.map(item => item.timestamp)
+        chartInstance.data.datasets.forEach((dataset) => {
+          if (dataset.label === 'Price') {
+            dataset.data = responseData.value.map((item, index): CandlestickData => ({
+              x: new Date(item.timestamp).getTime(),
+              o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+              h: item.high_24h,
+              l: item.low_24h,
+              c: item.current_price,
+            }))
+          } else if (dataset.label === 'MA 10') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.ma_10,
+            }))
+          } else if (dataset.label === 'MA 50') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.ma_50,
+            }))
+          } else if (dataset.label === 'RSI') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.rsi,
+            }))
+          }
+        })
+
+        if (chartInstance.options.scales && chartInstance.options.scales.y) {
+          chartInstance.options.scales.y.min = Math.min(...low24hValues) * 0.95;
+          chartInstance.options.scales.y.max = Math.max(...high24hValues) * 1.05;
+        }
+
+        chartInstance.update('none')
+      }
+    }
+
+    const updateChart = () => {
+      if (chartInstance) {
+        chartInstance.data.datasets.forEach((dataset) => {
+          if (dataset.label === 'Price') {
+            dataset.hidden = !showPrice.value
+          } else if (dataset.label === 'MA 10') {
+            dataset.hidden = !showMA10.value
+          } else if (dataset.label === 'MA 50') {
+            dataset.hidden = !showMA50.value
+          } else if (dataset.label === 'RSI') {
+            dataset.hidden = !showRSI.value
+          }
+        })
+
+        if (chartInstance.options.scales && chartInstance.options.scales['y-rsi']) {
+          chartInstance.options.scales['y-rsi'].display = showRSI.value
+        }
+
+        chartInstance.update('none')
+      }
+    }
+
+    watch([showPrice, showRSI, showMA10, showMA50], updateChart)
+
     return {
       responseData,
       cryptoMapping: CRYPTO_MAPPING,
@@ -395,7 +510,11 @@ export default {
       fetchCryptoData,
       tooltipState,
       handleCryptoClick,
-      handleTimeClick
+      handleTimeClick,
+      showPrice,
+      showRSI,
+      showMA10,
+      showMA50
     }
   },
 }
@@ -403,10 +522,22 @@ export default {
 
 <style>
 
-.button-container {
+.chart-container {
+  position: relative;
+  max-width: 100%;
+}
+
+.top-container, .bottom-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+}
+
+.top-container {
+  margin-bottom: 5px;
+}
+
+.bottom-container {
+  margin-top: 5px;
 }
 
 .crypto-buttons button, .time-buttons button {
@@ -437,6 +568,28 @@ canvas {
 
 body {
     background-color: #f5f5f5;
+}
+
+.chart-toggles {
+  display: flex;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.chart-toggles span {
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.chart-toggles span.hidden {
+  opacity: 0.5;
+}
+
+.tooltip-container {
+  display: flex;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 
 .tooltip-content {

@@ -68,6 +68,17 @@ import { format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash'
 
+import {
+  CRYPTO_MAPPING,
+  TIME_MAPPING,
+  type CryptoType,
+  type TimeType,
+  type CryptoDataPoint,
+  type ApiResponseItem,
+  type FetchCryptoDataParams,
+  type TooltipData
+} from '@/types/chart'
+
 declare module 'chart.js' {
   interface TooltipPositionerMap {
     custom: (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) => { x: number; y: number; xAlign: string; yAlign: string } | false
@@ -98,35 +109,6 @@ Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPositi
   }
 }
 
-interface CryptoMapping {
-  [key: string]: string;
-}
-interface TimeMapping {
-  [key: string]: string;
-}
-interface CryptoDataPoint {
-  timestamp: string;
-  current_price: number;
-  high_24h: number;
-  low_24h: number;
-  ma_10: number;
-  ma_50: number;
-  rsi: number;
-}
-interface ApiResponseItem {
-  timestamp: string;
-  current_price: string;
-  high_24h: string;
-  low_24h: string;
-  ma_10: string;
-  ma_50: string;
-  rsi: string;
-}
-interface FetchCryptoDataParams {
-  crypto: CryptoType;
-  time: TimeType;
-  pageLoad: boolean;
-}
 interface CandlestickData {
   x: number;
   o: number;
@@ -139,27 +121,6 @@ interface LineData {
   x: number;
   y: number;
 }
-interface TooltipData {
-  isVisible: boolean;
-  formattedDate: string;
-  data: CryptoDataPoint | null;
-}
-
-type CryptoType = typeof CRYPTO_MAPPING[keyof typeof CRYPTO_MAPPING]
-type TimeType = typeof TIME_MAPPING[keyof typeof TIME_MAPPING]
-
-const CRYPTO_MAPPING: CryptoMapping = {
-  BTC: 'bitcoin',
-  ETH: 'ethereum',
-  SOL: 'solana',
-  XMR: 'monero',
-  PAXG: 'paxg',
-} as const;
-const TIME_MAPPING: TimeMapping = {
-  '24h': 'hourly',
-  '7d': '7d',
-  '30d': '30d',
-} as const;
 
 export default {
   name: 'SMAChartComponent',

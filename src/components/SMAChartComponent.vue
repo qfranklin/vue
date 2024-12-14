@@ -1,75 +1,93 @@
 <template>
-  <div class="button-container">
-    <div class="crypto-buttons">
-      <button
-        v-for="(valueCrypto, displayCrypto) in cryptoMapping"
-        :key="valueCrypto"
-        :class="{ active: activeCrypto === valueCrypto }"
-        @click="handleCryptoClick(valueCrypto)"
-        :disabled="loading"
-      >
-        {{ displayCrypto }}
-      </button>
+  <div class="chart-container">
+    <div class="top-container">
+      <div class="crypto-buttons">
+        <button
+          v-for="(valueCrypto, displayCrypto) in cryptoMapping"
+          :key="valueCrypto"
+          :class="{ active: activeCrypto === valueCrypto }"
+          @click="handleCryptoClick(valueCrypto)"
+          :disabled="loading"
+        >
+          {{ displayCrypto }}
+        </button>
+      </div>
+
+      <div class="time-buttons">
+        <button
+          v-for="(valueTime, displayTime) in timeMapping"
+          :key="valueTime"
+          :class="{ active: activeTime === valueTime }"
+          @click="handleTimeClick(valueTime)"
+          :disabled="loading"
+        >
+          {{ displayTime }}
+        </button>
+      </div>
+
     </div>
 
-    <div class="time-buttons">
-      <button
-        v-for="(valueTime, displayTime) in timeMapping"
-        :key="valueTime"
-        :class="{ active: activeTime === valueTime }"
-        @click="handleTimeClick(valueTime)"
-        :disabled="loading"
-      >
-        {{ displayTime }}
-      </button>
-    </div>
+    <canvas id="cryptoChart"></canvas>
 
-  </div>
+    <div class="bottom-container">
 
-  <canvas id="cryptoChart"></canvas>
+      <div id="chartTooltip" class="tooltip-container" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
+        <div class="tooltip-content">
+          <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">Price:</span>
+            {{ tooltipState.data.current_price.toFixed(2) }}
+          </p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">24h High:</span>
+            {{ tooltipState.data.high_24h.toFixed(2) }}
+          </p>
+          <p v-if="showPrice" class="tooltip-item">
+            <span class="tooltip-label">24h Low:</span>
+            {{ tooltipState.data.low_24h.toFixed(2) }}
+          </p>
+          <p v-if="showMA10" class="tooltip-item">
+            <span class="tooltip-label">MA 10:</span>
+            {{ tooltipState.data.ma_10.toFixed(2) }}
+          </p>
+          <p v-if="showMA50" class="tooltip-item">
+            <span class="tooltip-label">MA 50:</span>
+            {{ tooltipState.data.ma_50.toFixed(2) }}
+          </p>
+          <p v-if="showRSI" class="tooltip-item">
+            <span class="tooltip-label">RSI:</span>
+            {{ tooltipState.data.rsi.toFixed(2) }}
+          </p>
+        </div>
+      </div>
 
-  <div class="chart-toggles">
-    <label>
-      <input type="checkbox" v-model="showPrice" /> Price
-    </label>
-    <label>
-      <input type="checkbox" v-model="showRSI" /> RSI
-    </label>
-    <label>
-      <input type="checkbox" v-model="showMA10" /> MA 10
-    </label>
-    <label>
-      <input type="checkbox" v-model="showMA50" /> MA 50
-    </label>
-  </div>
-
-  <div id="chartTooltip" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
-    <div class="tooltip-content">
-      <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
-      <p v-if="showPrice" class="tooltip-item">
-        <span class="tooltip-label">Price:</span>
-        {{ tooltipState.data.current_price.toFixed(2) }}
-      </p>
-      <p v-if="showPrice" class="tooltip-item">
-        <span class="tooltip-label">24h High:</span>
-        {{ tooltipState.data.high_24h.toFixed(2) }}
-      </p>
-      <p v-if="showPrice" class="tooltip-item">
-        <span class="tooltip-label">24h Low:</span>
-        {{ tooltipState.data.low_24h.toFixed(2) }}
-      </p>
-      <p v-if="showMA10" class="tooltip-item">
-        <span class="tooltip-label">MA 10:</span>
-        {{ tooltipState.data.ma_10.toFixed(2) }}
-      </p>
-      <p v-if="showMA50" class="tooltip-item">
-        <span class="tooltip-label">MA 50:</span>
-        {{ tooltipState.data.ma_50.toFixed(2) }}
-      </p>
-      <p v-if="showRSI" class="tooltip-item">
-        <span class="tooltip-label">RSI:</span>
-        {{ tooltipState.data.rsi.toFixed(2) }}
-      </p>
+      <div class="chart-toggles">
+        <span
+          :class="{ hidden: !showPrice }"
+          @click="showPrice = !showPrice"
+        >
+          Price
+        </span>
+        <span
+          :class="{ hidden: !showRSI }"
+          @click="showRSI = !showRSI"
+        >
+          RSI
+        </span>
+        <span
+          :class="{ hidden: !showMA10 }"
+          @click="showMA10 = !showMA10"
+        >
+          MA 10
+        </span>
+        <span
+          :class="{ hidden: !showMA50 }"
+          @click="showMA50 = !showMA50"
+        >
+          MA 50
+        </span>
+      </div>
+      
     </div>
   </div>
 </template>
@@ -496,10 +514,22 @@ export default {
 
 <style>
 
-.button-container {
+.chart-container {
+  position: relative;
+  max-width: 100%;
+}
+
+.top-container, .bottom-container {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+}
+
+.top-container {
+  margin-bottom: 5px;
+}
+
+.bottom-container {
+  margin-top: 5px;
 }
 
 .crypto-buttons button, .time-buttons button {
@@ -530,6 +560,27 @@ canvas {
 
 body {
     background-color: #f5f5f5;
+}
+
+.chart-toggles {
+  display: flex;
+  gap: 5px;
+  font-size: 16px;
+}
+
+.chart-toggles span {
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.chart-toggles span.hidden {
+  opacity: 0.5;
+}
+
+.tooltip-container {
+  display: flex;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 
 .tooltip-content {

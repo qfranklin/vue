@@ -32,6 +32,7 @@
 <script lang="ts">
 import axios from 'axios'
 import { ref, onMounted } from 'vue'
+import type { Ref } from 'vue'
 import { Chart, registerables, Tooltip } from 'chart.js'
 import type { ChartData } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
@@ -73,10 +74,30 @@ Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPositi
 interface CryptoMapping {
   [key: string]: string;
 }
-
 interface TimeMapping {
   [key: string]: string;
 }
+interface CryptoDataPoint {
+  timestamp: string;
+  current_price: number;
+  high_24h: number;
+  low_24h: number;
+  ma_10: number;
+  ma_50: number;
+  rsi: number;
+}
+interface ApiResponseItem {
+  timestamp: string;
+  current_price: string;
+  high_24h: string;
+  low_24h: string;
+  ma_10: string;
+  ma_50: string;
+  rsi: string;
+}
+
+type CryptoType = typeof CRYPTO_MAPPING[keyof typeof CRYPTO_MAPPING]
+type TimeType = typeof TIME_MAPPING[keyof typeof TIME_MAPPING]
 
 const CRYPTO_MAPPING: CryptoMapping = {
   BTC: 'bitcoin',
@@ -85,7 +106,6 @@ const CRYPTO_MAPPING: CryptoMapping = {
   XMR: 'monero',
   PAXG: 'paxg',
 } as const;
-
 const TIME_MAPPING: TimeMapping = {
   '24h': 'hourly',
   '7d': '7d',
@@ -95,12 +115,12 @@ const TIME_MAPPING: TimeMapping = {
 export default {
   name: 'SMAChartComponent',
   setup() {
-    const activeCrypto = ref('bitcoin')
-    const activeTime = ref('hourly')
-    const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
+    const activeCrypto: Ref<CryptoType> = ref('bitcoin')
+    const activeTime: Ref<TimeType> = ref('hourly')
+    const responseData = ref<CryptoDataPoint[]>([])
+    const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
-    const selectedDataPoint = ref<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number } | null>(null)
 
     const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
       if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
@@ -116,8 +136,8 @@ export default {
           }
         })
 
-        responseData.value = response.data.map((item: { timestamp: string; current_price: string; high_24h: string; low_24h: string; ma_10: string; ma_50: string; rsi: string }) => ({
-          date: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : item.timestamp,
+        responseData.value = response.data.map((item: ApiResponseItem): CryptoDataPoint => ({
+          timestamp: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : item.timestamp,
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -137,7 +157,7 @@ export default {
 
     const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300)
 
-    const displayTooltip = (data: { date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }) => {
+    const displayTooltip = (data: CryptoDataPoint) => {
       const tooltipEl = document.getElementById('chartTooltip')
       if (!tooltipEl) {
         console.warn('Tooltip element not found.')
@@ -146,9 +166,9 @@ export default {
 
       let formattedDate;
       if (activeTime.value === 'hourly') {
-        formattedDate = format(new Date(data.date), 'ha').toLowerCase()
+        formattedDate = format(new Date(data.timestamp), 'ha').toLowerCase()
       } else {
-        const date = new Date(data.date)
+        const date = new Date(data.timestamp)
         const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
         formattedDate = format(utcDate, 'MM/dd')
       }
@@ -179,13 +199,13 @@ export default {
       const high24hValues = responseData.value.map(item => item.high_24h).filter(value => !isNaN(value))
 
       const chartData: ChartData = {
-        labels: responseData.value.map(item => item.date),
+        labels: responseData.value.map(item => item.timestamp),
         datasets: [
           {
             label: 'Price',
             type: 'candlestick',
             data: responseData.value.map((item, index) => ({
-              x: new Date(item.date).getTime(),
+              x: new Date(item.timestamp).getTime(),
               o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
               h: item.high_24h,
               l: item.low_24h,
@@ -198,7 +218,7 @@ export default {
             label: 'MA 10',
             type: 'line',
             data: responseData.value.map(item => ({
-              x: new Date(item.date).getTime(),
+              x: new Date(item.timestamp).getTime(),
               y: item.ma_10,
             })),
             borderColor: 'rgba(51, 51, 51, 0.5)',
@@ -212,7 +232,7 @@ export default {
             label: 'MA 50',
             type: 'line',
             data: responseData.value.map(item => ({
-              x: new Date(item.date).getTime(),
+              x: new Date(item.timestamp).getTime(),
               y: item.ma_50,
             })),
             borderColor: 'rgba(51, 51, 51, 0.3)',
@@ -226,7 +246,7 @@ export default {
             label: 'RSI',
             type: 'line',
             data: responseData.value.map(item => ({
-              x: new Date(item.date).getTime(),
+              x: new Date(item.timestamp).getTime(),
               y: item.rsi,
             })),
             borderColor: 'rgba(255, 99, 132, 1)',

@@ -25,31 +25,48 @@
     </div>
 
   </div>
+
   <canvas id="cryptoChart"></canvas>
+
+  <div class="chart-toggles">
+    <label>
+      <input type="checkbox" v-model="showPrice" /> Price
+    </label>
+    <label>
+      <input type="checkbox" v-model="showRSI" /> RSI
+    </label>
+    <label>
+      <input type="checkbox" v-model="showMA10" /> MA 10
+    </label>
+    <label>
+      <input type="checkbox" v-model="showMA50" /> MA 50
+    </label>
+  </div>
+
   <div id="chartTooltip" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
     <div class="tooltip-content">
       <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
-      <p class="tooltip-item">
+      <p v-if="showPrice" class="tooltip-item">
         <span class="tooltip-label">Price:</span>
         {{ tooltipState.data.current_price.toFixed(2) }}
       </p>
-      <p class="tooltip-item">
+      <p v-if="showPrice" class="tooltip-item">
         <span class="tooltip-label">24h High:</span>
         {{ tooltipState.data.high_24h.toFixed(2) }}
       </p>
-      <p class="tooltip-item">
+      <p v-if="showPrice" class="tooltip-item">
         <span class="tooltip-label">24h Low:</span>
         {{ tooltipState.data.low_24h.toFixed(2) }}
       </p>
-      <p class="tooltip-item">
+      <p v-if="showMA10" class="tooltip-item">
         <span class="tooltip-label">MA 10:</span>
         {{ tooltipState.data.ma_10.toFixed(2) }}
       </p>
-      <p class="tooltip-item">
+      <p v-if="showMA50" class="tooltip-item">
         <span class="tooltip-label">MA 50:</span>
         {{ tooltipState.data.ma_50.toFixed(2) }}
       </p>
-      <p class="tooltip-item">
+      <p v-if="showRSI" class="tooltip-item">
         <span class="tooltip-label">RSI:</span>
         {{ tooltipState.data.rsi.toFixed(2) }}
       </p>
@@ -59,7 +76,7 @@
 
 <script lang="ts">
 import axios from 'axios'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import type { Ref } from 'vue'
 import { Chart, registerables, Tooltip } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
@@ -129,8 +146,13 @@ export default {
     const activeTime: Ref<TimeType> = ref('hourly')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
-    const chartInstance = ref<Chart | null>(null)
+    let chartInstance: Chart | null = null
     const loading = ref(false)
+
+    const showPrice = ref(true)
+    const showRSI = ref(true)
+    const showMA10 = ref(false)
+    const showMA50 = ref(false)
 
     const fetchCryptoDataDebounced = debounce(
       (params: FetchCryptoDataParams) => fetchCryptoData(params),
@@ -191,8 +213,8 @@ export default {
         }));
 
 
-        if (chartInstance.value) {
-          chartInstance.value.destroy();
+        if (chartInstance) {
+          chartInstance.destroy();
         }
         renderChart();
 
@@ -253,6 +275,7 @@ export default {
               })),
               borderColor: '#333333',
               backgroundColor: '#333333',
+              hidden: !showPrice.value,
             },
             {
               label: 'MA 10',
@@ -267,6 +290,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showMA10.value,
             },
             {
               label: 'MA 50',
@@ -281,6 +305,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showMA50.value,
             },
             {
               label: 'RSI',
@@ -296,6 +321,7 @@ export default {
               pointRadius: 0,
               borderWidth: 1,
               tension: 0.4,
+              hidden: !showRSI.value,
             },
           ],
         },
@@ -356,7 +382,7 @@ export default {
         },
       }
 
-      chartInstance.value = new Chart(ctx, chartConfiguration)
+      chartInstance = new Chart(ctx, chartConfiguration)
     }
 
     const handleCryptoClick = (crypto: CryptoType) => {
@@ -383,6 +409,25 @@ export default {
       })
     })
 
+    const updateChart = () => {
+      if (chartInstance) {
+        chartInstance.data.datasets.forEach((dataset) => {
+          if (dataset.label === 'Price') {
+            dataset.hidden = !showPrice.value
+          } else if (dataset.label === 'MA 10') {
+            dataset.hidden = !showMA10.value
+          } else if (dataset.label === 'MA 50') {
+            dataset.hidden = !showMA50.value
+          } else if (dataset.label === 'RSI') {
+            dataset.hidden = !showRSI.value
+          }
+        })
+        chartInstance.update('none')
+      }
+    }
+
+    watch([showPrice, showRSI, showMA10, showMA50], updateChart)
+
     return {
       responseData,
       cryptoMapping: CRYPTO_MAPPING,
@@ -395,7 +440,11 @@ export default {
       fetchCryptoData,
       tooltipState,
       handleCryptoClick,
-      handleTimeClick
+      handleTimeClick,
+      showPrice,
+      showRSI,
+      showMA10,
+      showMA50
     }
   },
 }

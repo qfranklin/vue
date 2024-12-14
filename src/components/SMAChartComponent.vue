@@ -5,7 +5,7 @@
         v-for="(valueCrypto, displayCrypto) in cryptoMapping"
         :key="valueCrypto"
         :class="{ active: activeCrypto === valueCrypto }"
-        @click="fetchCryptoDataDebounced(valueCrypto, activeTime, false)"
+        @click="handleCryptoClick(valueCrypto)"
         :disabled="loading"
       >
         {{ displayCrypto }}
@@ -17,7 +17,7 @@
         v-for="(valueTime, displayTime) in timeMapping"
         :key="valueTime"
         :class="{ active: activeTime === valueTime }"
-        @click="fetchCryptoDataDebounced(activeCrypto, valueTime, false)"
+        @click="handleTimeClick(valueTime)"
         :disabled="loading"
       >
         {{ displayTime }}
@@ -123,6 +123,11 @@ interface ApiResponseItem {
   ma_50: string;
   rsi: string;
 }
+interface FetchCryptoDataParams {
+  crypto: CryptoType;
+  time: TimeType;
+  pageLoad: boolean;
+}
 interface TooltipData {
   isVisible: boolean;
   formattedDate: string;
@@ -155,6 +160,11 @@ export default {
     const chartInstance = ref<Chart | null>(null)
     const loading = ref(false)
 
+    const fetchCryptoDataDebounced = debounce(
+      (params: FetchCryptoDataParams) => fetchCryptoData(params),
+      300
+    ) as (params: FetchCryptoDataParams) => Promise<void>
+
     const tooltipState = ref<TooltipData>({
       isVisible: false,
       formattedDate: '',
@@ -169,40 +179,57 @@ export default {
       return format(utcDate, 'MM/dd')
     }
 
-    const fetchCryptoData = async (crypto: string, time: string, pageLoad: boolean) => {
-      if (activeCrypto.value === crypto && activeTime.value === time && !pageLoad) return
-      loading.value = true
-      activeCrypto.value = crypto
-      activeTime.value = time
+    const fetchCryptoData = async ({
+      crypto,
+      time,
+      pageLoad
+    }: FetchCryptoDataParams): Promise<void> => {
+      if (activeCrypto.value === crypto &&
+          activeTime.value === time &&
+          !pageLoad){
+       return;
+      }
 
       try {
+
+        loading.value = true
+        activeCrypto.value = crypto
+        activeTime.value = time
+
         const response = await axios.get(`/api/crypto/get-prices`, {
           params: {
             crypto: crypto.toLowerCase(),
             range: time
           }
-        })
+        });
 
         responseData.value = response.data.map((item: ApiResponseItem): CryptoDataPoint => ({
-          timestamp: time === 'hourly' ? format(new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }), 'yyyy-MM-dd HH:mm:ss') : item.timestamp,
+          timestamp: time === 'hourly'
+            ? format(
+                new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }),
+                'yyyy-MM-dd HH:mm:ss'
+              )
+            : item.timestamp,
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
           ma_10: parseFloat(item.ma_10),
           ma_50: parseFloat(item.ma_50),
-          rsi: parseFloat(item.rsi),
-        }))
+          rsi: parseFloat(item.rsi)
+        }));
 
 
-        renderChart()
+        if (chartInstance.value) {
+          chartInstance.value.destroy();
+        }
+        renderChart();
+
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error)
       } finally {
         loading.value = false
       }
     }
-
-    const fetchCryptoDataDebounced = debounce(fetchCryptoData, 300)
 
     const displayTooltip = (data: CryptoDataPoint) => {
       tooltipState.value = {
@@ -215,10 +242,6 @@ export default {
     const renderChart = () => {
       const canvas = document.getElementById('cryptoChart') as HTMLCanvasElement
       const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-      if (chartInstance.value) {
-        chartInstance.value.destroy()
-        chartInstance.value = null
-      }
 
       const low24hValues = responseData.value.map(item => item.low_24h).filter(value => !isNaN(value))
       const high24hValues = responseData.value.map(item => item.high_24h).filter(value => !isNaN(value))
@@ -361,8 +384,28 @@ export default {
       }
     }
 
-    onMounted(() => {
-      fetchCryptoDataDebounced(activeCrypto.value, activeTime.value, true)
+    const handleCryptoClick = (crypto: CryptoType) => {
+      fetchCryptoDataDebounced({
+        crypto,
+        time: activeTime.value,
+        pageLoad: false
+      });
+    };
+
+    const handleTimeClick = (time: TimeType) => {
+      fetchCryptoDataDebounced({
+        crypto: activeCrypto.value,
+        time,
+        pageLoad: false
+      });
+    };
+
+    onMounted(async () => {
+      await fetchCryptoData({
+        crypto: activeCrypto.value,
+        time: activeTime.value,
+        pageLoad: true
+      })
     })
 
     return {
@@ -375,7 +418,9 @@ export default {
       loading,
       selectedDataPoint,
       fetchCryptoData,
-      tooltipState
+      tooltipState,
+      handleCryptoClick,
+      handleTimeClick
     }
   },
 }

@@ -47,11 +47,11 @@
             {{ tooltipState.data.low_24h.toFixed(2) }}
           </p>
           <p v-if="showMA10" class="tooltip-item">
-            <span class="tooltip-label">MA 10:</span>
+            <span class="tooltip-label">MA10:</span>
             {{ tooltipState.data.ma_10.toFixed(2) }}
           </p>
           <p v-if="showMA50" class="tooltip-item">
-            <span class="tooltip-label">MA 50:</span>
+            <span class="tooltip-label">MA50:</span>
             {{ tooltipState.data.ma_50.toFixed(2) }}
           </p>
           <p v-if="showRSI" class="tooltip-item">
@@ -78,13 +78,13 @@
           :class="{ hidden: !showMA10 }"
           @click="showMA10 = !showMA10"
         >
-          MA 10
+          MA10
         </span>
         <span
           :class="{ hidden: !showMA50 }"
           @click="showMA50 = !showMA50"
         >
-          MA 50
+          MA50
         </span>
       </div>
 
@@ -573,10 +573,11 @@ body {
 .chart-toggles {
   display: flex;
   gap: 5px;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .chart-toggles span {
+  font-weight: bold;
   cursor: pointer;
   transition: opacity 0.3s;
 }

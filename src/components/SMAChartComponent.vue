@@ -62,8 +62,7 @@ import axios from 'axios'
 import { ref, onMounted } from 'vue'
 import type { Ref } from 'vue'
 import { Chart, registerables, Tooltip } from 'chart.js'
-import type { ChartData } from 'chart.js'
-import type { TooltipItem, TooltipModel, ActiveElement } from 'chart.js'
+import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
 import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
 import { format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
@@ -127,6 +126,18 @@ interface FetchCryptoDataParams {
   crypto: CryptoType;
   time: TimeType;
   pageLoad: boolean;
+}
+interface CandlestickData {
+  x: number;
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+}
+
+interface LineData {
+  x: number;
+  y: number;
 }
 interface TooltipData {
   isVisible: boolean;
@@ -224,6 +235,10 @@ export default {
         }
         renderChart();
 
+        if (responseData.value.length > 0) {
+          displayTooltip(responseData.value[responseData.value.length - 1]);
+        }
+
       } catch (error) {
         console.error(`Failed to fetch ${crypto} data:`, error)
       } finally {
@@ -241,76 +256,88 @@ export default {
 
     const renderChart = () => {
       const canvas = document.getElementById('cryptoChart') as HTMLCanvasElement
-      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-
-      const low24hValues = responseData.value.map(item => item.low_24h).filter(value => !isNaN(value))
-      const high24hValues = responseData.value.map(item => item.high_24h).filter(value => !isNaN(value))
-
-      const chartData: ChartData = {
-        labels: responseData.value.map(item => item.timestamp),
-        datasets: [
-          {
-            label: 'Price',
-            type: 'candlestick',
-            data: responseData.value.map((item, index) => ({
-              x: new Date(item.timestamp).getTime(),
-              o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
-              h: item.high_24h,
-              l: item.low_24h,
-              c: item.current_price,
-            })),
-            borderColor: '#333333',
-            backgroundColor: '#333333',
-          },
-          {
-            label: 'MA 10',
-            type: 'line',
-            data: responseData.value.map(item => ({
-              x: new Date(item.timestamp).getTime(),
-              y: item.ma_10,
-            })),
-            borderColor: 'rgba(51, 51, 51, 0.5)',
-            backgroundColor: 'rgba(51, 51, 51, 0.5)',
-            fill: false,
-            pointRadius: 0,
-            borderWidth: 1,
-            tension: 0.4,
-          },
-          {
-            label: 'MA 50',
-            type: 'line',
-            data: responseData.value.map(item => ({
-              x: new Date(item.timestamp).getTime(),
-              y: item.ma_50,
-            })),
-            borderColor: 'rgba(51, 51, 51, 0.3)',
-            backgroundColor: 'rgba(51, 51, 51, 0.3)',
-            fill: false,
-            pointRadius: 0,
-            borderWidth: 1,
-            tension: 0.4,
-          },
-          {
-            label: 'RSI',
-            type: 'line',
-            data: responseData.value.map(item => ({
-              x: new Date(item.timestamp).getTime(),
-              y: item.rsi,
-            })),
-            borderColor: 'rgba(255, 99, 132, 1)',
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-            fill: false,
-            pointRadius: 0,
-            borderWidth: 1,
-            tension: 0.4,
-            yAxisID: 'y-rsi',
-          },
-        ],
+      if (!canvas) {
+        console.error('Canvas element not found')
+        return
       }
 
-      chartInstance.value = new Chart(ctx, {
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        console.error('Canvas context not found')
+        return
+      }
+
+      // Calculate boundaries for y-axis
+      const low24hValues = responseData.value
+        .map(item => item.low_24h)
+        .filter(value => !isNaN(value))
+      const high24hValues = responseData.value
+        .map(item => item.high_24h)
+        .filter(value => !isNaN(value))
+
+      const chartConfiguration: ChartConfiguration = {
         type: 'candlestick',
-        data: chartData,
+        data: {
+          labels: responseData.value.map(item => item.timestamp),
+          datasets: [
+            {
+              label: 'Price',
+              type: 'candlestick',
+              data: responseData.value.map((item, index): CandlestickData => ({
+                x: new Date(item.timestamp).getTime(),
+                o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+                h: item.high_24h,
+                l: item.low_24h,
+                c: item.current_price,
+              })),
+              borderColor: '#333333',
+              backgroundColor: '#333333',
+            },
+            {
+              label: 'MA 10',
+              type: 'line',
+              data: responseData.value.map((item): LineData => ({
+                x: new Date(item.timestamp).getTime(),
+                y: item.ma_10,
+              })),
+              borderColor: 'rgba(51, 51, 51, 0.5)',
+              backgroundColor: 'rgba(51, 51, 51, 0.5)',
+              fill: false,
+              pointRadius: 0,
+              borderWidth: 1,
+              tension: 0.4,
+            },
+            {
+              label: 'MA 50',
+              type: 'line',
+              data: responseData.value.map((item): LineData => ({
+                x: new Date(item.timestamp).getTime(),
+                y: item.ma_50,
+              })),
+              borderColor: 'rgba(51, 51, 51, 0.25)',
+              backgroundColor: 'rgba(51, 51, 51, 0.25)',
+              fill: false,
+              pointRadius: 0,
+              borderWidth: 1,
+              tension: 0.4,
+            },
+            {
+              label: 'RSI',
+              type: 'line',
+              yAxisID: 'y-rsi',
+              data: responseData.value.map((item): LineData => ({
+                x: new Date(item.timestamp).getTime(),
+                y: item.rsi,
+              })),
+              borderColor: '#666666',
+              backgroundColor: '#666666',
+              fill: false,
+              pointRadius: 0,
+              borderWidth: 1,
+              tension: 0.4,
+            },
+          ],
+        },
         options: {
           responsive: true,
           scales: {
@@ -334,8 +361,10 @@ export default {
               grid: {
                 drawTicks: true,
                 drawOnChartArea: true,
-                color: context => {
-                  return context.tick.value === 30 || context.tick.value === 70 ? 'rgba(0, 0, 0, 0.4)' : 'transparent'
+                color: (context) => {
+                  return context.tick.value === 30 || context.tick.value === 70
+                    ? 'rgba(0, 0, 0, 0.4)'
+                    : 'transparent'
                 },
               },
             },
@@ -346,42 +375,27 @@ export default {
             axis: 'x',
           },
           plugins: {
+            tooltip: {
+              enabled: false,
+              external: (context) => {
+                const { tooltip } = context
+                if (tooltip.dataPoints && tooltip.dataPoints.length > 0) {
+                  const dataIndex = tooltip.dataPoints[0].dataIndex
+                  displayTooltip(responseData.value[dataIndex])
+                } else {
+                  tooltipState.value.isVisible = false
+                }
+              },
+              position: 'custom',
+            },
             legend: {
               display: false,
             },
-            tooltip: {
-              enabled: false, // Disable the default tooltip rendering
-              external: function (context) {
-                const tooltipEl = document.getElementById('chartTooltip');
-
-                // Handle null case
-                if (!tooltipEl) {
-                  console.warn('Tooltip element not found.');
-                  return;
-                }
-
-                // Hide tooltip if no data and no data point is selected
-                if (context.tooltip.opacity === 0 && !selectedDataPoint.value) {
-                  tooltipEl.style.opacity = '0';
-                  return;
-                }
-
-                // Get the data for the tooltip
-                const index = context.tooltip.dataPoints[0].dataIndex;
-                const data = responseData.value[index];
-
-                displayTooltip(data)
-              },
-            }
           },
         },
-      })
-
-      // Set the selected data point to the latest data point and display the tooltip
-      if (responseData.value.length > 0) {
-        selectedDataPoint.value = responseData.value[responseData.value.length - 1]
-        displayTooltip(selectedDataPoint.value)
       }
+
+      chartInstance.value = new Chart(ctx, chartConfiguration)
     }
 
     const handleCryptoClick = (crypto: CryptoType) => {

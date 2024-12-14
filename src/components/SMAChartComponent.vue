@@ -70,23 +70,31 @@ Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPositi
   }
 }
 
+interface CryptoMapping {
+  [key: string]: string;
+}
+
+interface TimeMapping {
+  [key: string]: string;
+}
+
+const CRYPTO_MAPPING: CryptoMapping = {
+  BTC: 'bitcoin',
+  ETH: 'ethereum',
+  SOL: 'solana',
+  XMR: 'monero',
+  PAXG: 'paxg',
+} as const;
+
+const TIME_MAPPING: TimeMapping = {
+  '24h': 'hourly',
+  '7d': '7d',
+  '30d': '30d',
+} as const;
+
 export default {
   name: 'SMAChartComponent',
   setup() {
-    const cryptoMapping = {
-      BTC: 'bitcoin',
-      ETH: 'ethereum',
-      SOL: 'solana',
-      XMR: 'monero',
-      PAXG: 'paxg',
-    }
-    const cryptos = Object.values(cryptoMapping)
-    const timeMapping = {
-      '24h': 'hourly',
-      '7d': '7d',
-      '30d': '30d',
-    }
-    const times = Object.values(timeMapping)
     const activeCrypto = ref('bitcoin')
     const activeTime = ref('hourly')
     const responseData = ref<Array<{ date: string; current_price: number; high_24h: number; low_24h: number; ma_10: number; ma_50: number; rsi: number }>>([])
@@ -314,10 +322,8 @@ export default {
 
     return {
       responseData,
-      cryptoMapping,
-      cryptos,
-      timeMapping,
-      times,
+      cryptoMapping: CRYPTO_MAPPING,
+      timeMapping : TIME_MAPPING,
       activeCrypto,
       activeTime,
       fetchCryptoDataDebounced,

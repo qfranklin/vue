@@ -214,9 +214,10 @@ export default {
 
 
         if (chartInstance) {
-          chartInstance.destroy();
+          updateChartData();
+        } else {
+          renderChart();
         }
-        renderChart();
 
         if (responseData.value.length > 0) {
           displayTooltip(responseData.value[responseData.value.length - 1]);
@@ -408,6 +409,49 @@ export default {
         pageLoad: true
       })
     })
+
+    const updateChartData = () => {
+      if (chartInstance) {
+
+        const low24hValues = responseData.value.map(item => item.low_24h);
+        const high24hValues = responseData.value.map(item => item.high_24h);
+
+        chartInstance.data.labels = responseData.value.map(item => item.timestamp)
+        chartInstance.data.datasets.forEach((dataset) => {
+          if (dataset.label === 'Price') {
+            dataset.data = responseData.value.map((item, index): CandlestickData => ({
+              x: new Date(item.timestamp).getTime(),
+              o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+              h: item.high_24h,
+              l: item.low_24h,
+              c: item.current_price,
+            }))
+          } else if (dataset.label === 'MA 10') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.ma_10,
+            }))
+          } else if (dataset.label === 'MA 50') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.ma_50,
+            }))
+          } else if (dataset.label === 'RSI') {
+            dataset.data = responseData.value.map((item): LineData => ({
+              x: new Date(item.timestamp).getTime(),
+              y: item.rsi,
+            }))
+          }
+        })
+
+        if (chartInstance.options.scales && chartInstance.options.scales.y) {
+          chartInstance.options.scales.y.min = Math.min(...low24hValues) * 0.95;
+          chartInstance.options.scales.y.max = Math.max(...high24hValues) * 1.05;
+        }
+
+        chartInstance.update('none')
+      }
+    }
 
     const updateChart = () => {
       if (chartInstance) {

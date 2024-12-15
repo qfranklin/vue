@@ -11,8 +11,8 @@
         <input type="text" id="price" v-model="price" required />
       </div>
       <div>
-        <label for="image">Image:</label>
-        <input type="file" id="image" @change="handleImageUpload" required />
+        <label for="images">Image:</label>
+        <input type="file" id="images" @change="handleImageUpload" multiple required />
       </div>
       <button type="submit">Add Product</button>
     </form>
@@ -23,19 +23,21 @@
 import { defineComponent, ref } from 'vue'
 import axios from '@/axiosConfig'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AddProductPage',
   setup() {
     const description = ref('')
     const price = ref('')
-    const image = ref<File | null>(null)
+    const images = ref<File[]>([])
     const router = useRouter()
+    const userStore = useUserStore()
 
     const handleImageUpload = (event: Event) => {
       const target = event.target as HTMLInputElement
       if (target.files && target.files[0]) {
-        image.value = target.files[0]
+        images.value = Array.from(target.files)
       }
     }
 
@@ -43,12 +45,16 @@ export default defineComponent({
       const formData = new FormData()
       formData.append('description', description.value)
       formData.append('price', price.value)
-      if (image.value) {
-        formData.append('image', image.value)
-      }
+      images.value.forEach((image, index) => {
+        formData.append(`images[${index}]`, image)
+      })
 
       try {
-        await axios.post('/api/products', formData)
+        await axios.post('/api/products', formData, {
+          headers: {
+            Authorization: `Bearer ${userStore.token}`
+          }
+        })
         router.push('/products')
       } catch (error) {
         console.error('Failed to add product:', error)

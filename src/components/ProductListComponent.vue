@@ -1,10 +1,11 @@
 <template>
   <div>
-    <h1>Glass</h1>
     <div v-for="product in products" :key="product.id" @click="viewProduct(product.id)">
-      <img :src="product.images[0]" alt="Product Image" />
-      <p>{{ product.description }}</p>
-      <p>{{ product.price }}</p>
+      <h2>{{ product.description }}</h2>
+      <p>Price: ${{ product.price }}</p>
+      <div v-if="product.images && product.images.length">
+        <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
+      </div>
     </div>
     <button v-if="isAdmin" @click="addProduct">Add Product</button>
   </div>
@@ -16,11 +17,19 @@ import { useRouter } from 'vue-router'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
+export interface Product {
+  id: number;
+  description: string;
+  price: number;
+  images: string[];
+}
+
 export default defineComponent({
   name: 'ProductListComponent',
   setup() {
     const router = useRouter()
-    const products = ref([])
+
+    const products = ref<Product[]>([])
     const userStore = useUserStore()
     const isAdmin = ref(userStore.isAdmin)
 
@@ -41,11 +50,15 @@ export default defineComponent({
       router.push('/products/add')
     }
 
+    const getImageUrl = (imagePath: string) => {
+      return `http://127.0.0.1:8082/storage/${imagePath}`
+    }
+
     onMounted(() => {
       fetchProducts()
     })
 
-    return { products, viewProduct, isAdmin, addProduct }
+    return { products, viewProduct, isAdmin, addProduct, getImageUrl }
   }
 })
 </script>

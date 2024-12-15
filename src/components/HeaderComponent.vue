@@ -2,7 +2,7 @@
   <header class="header">
     <nav class="left-nav">
       <router-link to="/">Home</router-link>
-      <router-link v-if="isAdmin" to="/admin">Admin</router-link>
+      <router-link to="/products">Glass</router-link>
     </nav>
     <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>

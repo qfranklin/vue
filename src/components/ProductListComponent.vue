@@ -51,7 +51,10 @@ export default defineComponent({
     }
 
     const getImageUrl = (imagePath: string) => {
-      return `http://127.0.0.1:8082/storage/${imagePath}`
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? 'https://qfranklin.xyz/storage'
+        : 'http://127.0.0.1:8082/storage'
+      return `${baseUrl}/${imagePath}`
     }
 
     onMounted(() => {

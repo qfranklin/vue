@@ -99,6 +99,8 @@ import type { Ref } from 'vue'
 import { Chart, registerables, Tooltip } from 'chart.js'
 import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
 import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
+import annotationPlugin from 'chartjs-plugin-annotation';
+import type { AnnotationOptions } from 'chartjs-plugin-annotation';
 import { format } from 'date-fns'
 import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash'
@@ -120,7 +122,7 @@ declare module 'chart.js' {
   }
 }
 
-Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcElement)
+Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcElement, annotationPlugin)
 
 Tooltip.positioners.custom = function (items: TooltipItem<'line'>[], eventPosition: { x: number; y: number }) {
   const pos = Tooltip.positioners.average.call(this as unknown as TooltipModel<'line'>, items as unknown as ActiveElement[], eventPosition)
@@ -383,6 +385,32 @@ export default {
             mode: 'nearest',
             axis: 'x',
           },
+          onHover: (event) => {
+            if (chartInstance) {
+              const xScale = chartInstance.scales.x;
+              const mouseX = event.x;
+
+              // Convert mouse position to value on x-axis
+              if (mouseX !== null) {
+                const timestamp = xScale.getValueForPixel(mouseX);
+
+                if(timestamp){
+                  const nearestPoint = responseData.value.reduce((prev, curr) => {
+                    const currTime = new Date(curr.timestamp).getTime();
+                    const prevTime = new Date(prev.timestamp).getTime();
+                    return Math.abs(currTime - timestamp) < Math.abs(prevTime - timestamp) ? curr : prev;
+                  });
+                  const nearestTimestamp = new Date(nearestPoint.timestamp).getTime();
+                  const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+                  if (annotations?.verticalLine) {
+                    annotations.verticalLine.xMin = nearestTimestamp;
+                    annotations.verticalLine.xMax = nearestTimestamp;
+                    chartInstance.update('none');
+                  }
+                }
+              }
+            }
+          },
           plugins: {
             tooltip: {
               enabled: false,
@@ -390,9 +418,12 @@ export default {
                 const { tooltip } = context
                 if (tooltip.dataPoints && tooltip.dataPoints.length > 0) {
                   const dataIndex = tooltip.dataPoints[0].dataIndex
-                  displayTooltip(responseData.value[dataIndex])
+                  const dataPoint = responseData.value[dataIndex]
+                  displayTooltip(dataPoint)
+                  selectedDataPoint.value = dataPoint
                 } else {
                   tooltipState.value.isVisible = false
+                  selectedDataPoint.value = null
                 }
               },
               position: 'custom',
@@ -400,6 +431,26 @@ export default {
             legend: {
               display: false,
             },
+            annotation: {
+              animations: {
+                numbers: {
+                  duration: 0
+                }
+              },
+              annotations: {
+                verticalLine: {
+                  type: 'line' as const,
+                  xMin: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : "2024-12-15 04:00:00",
+                  xMax: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : "2024-12-15 04:00:00",
+                  borderColor: 'rgba(0, 0, 0, 0.5)',
+                  borderWidth: 1,
+                  borderDash: [5, 5],
+                  label: {
+                    display: false
+                  }
+                }
+              }
+            }
           },
         },
       }

@@ -3,7 +3,7 @@
     <SMAChartComponent />
     <div v-if="isLoggedIn">
       <NotesComponent />
-      <LifepathComponent />
+      <!--<LifepathComponent />-->
     </div>
   </section>
 </template>

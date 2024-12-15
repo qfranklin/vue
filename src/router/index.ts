@@ -3,6 +3,7 @@ import AboutPage from '../views/AboutPage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import AdminPage from '../views/AdminPage.vue'
+import GenerateSTLPage from '../views/GenerateSTLPage.vue'
 import { useUserStore } from '@/stores/user'
 
 const routes = [
@@ -26,6 +27,11 @@ const routes = [
     name: 'Admin',
     component: AdminPage,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/generate-stl',
+    name: 'GenerateSTL',
+    component: GenerateSTLPage
   }
 ]
 

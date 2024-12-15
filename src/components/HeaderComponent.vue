@@ -2,12 +2,11 @@
   <header class="header">
     <nav class="left-nav">
       <router-link to="/">Home</router-link>
-      <router-link v-if="isAdmin" to="/admin">Admin</router-link>
+      <router-link to="/generate-stl">QR Code</router-link>
     </nav>
     <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
       <router-link v-if="!isLoggedIn" to="/register">Register</router-link>
-      <span v-if="isLoggedIn" class="user-email">{{ userEmail }}</span>
       <button v-if="isLoggedIn" @click="logout">Logout</button>
     </nav>
   </header>

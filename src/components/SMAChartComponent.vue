@@ -350,7 +350,7 @@ export default {
           responsive: true,
           scales: {
             x: {
-              display: false
+              display: true
             },
             y: {
               beginAtZero: false,
@@ -440,8 +440,16 @@ export default {
               annotations: {
                 verticalLine: {
                   type: 'line' as const,
-                  xMin: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : '',
-                  xMax: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : '',
+                  xMin: selectedDataPoint.value 
+                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
+                    : activeTime.value === 'hourly'
+                      ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
+                      : responseData.value[responseData.value.length - 1].timestamp,
+                  xMax: selectedDataPoint.value 
+                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
+                    : activeTime.value === 'hourly'
+                      ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
+                      : responseData.value[responseData.value.length - 1].timestamp,
                   borderColor: 'rgba(0, 0, 0, 0.5)',
                   borderWidth: 1,
                   borderDash: [5, 5],
@@ -534,6 +542,15 @@ export default {
         if (chartInstance.options.scales && chartInstance.options.scales.y) {
           chartInstance.options.scales.y.min = Math.min(...low24hValues) * 0.95;
           chartInstance.options.scales.y.max = Math.max(...high24hValues) * 1.05;
+        }
+
+        const lastPoint = responseData.value[responseData.value.length - 1];
+        const lastTimestamp = new Date(lastPoint.timestamp).getTime();
+
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+        if (annotations?.verticalLine) {
+          annotations.verticalLine.xMin = lastTimestamp;
+          annotations.verticalLine.xMax = lastTimestamp;
         }
 
         chartInstance.update('none')

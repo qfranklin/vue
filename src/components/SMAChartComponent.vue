@@ -31,6 +31,34 @@
 
     <div class="bottom-container">
 
+      <div class="chart-toggles">
+        <span
+          :class="{ hidden: !showPrice }"
+          @click="showPrice = !showPrice"
+        >
+          Price
+        </span>
+        <span
+          :class="{ hidden: !showRSI }"
+          @click="showRSI = !showRSI"
+        >
+          RSI
+        </span>
+        <span
+          :class="{ hidden: !showMA10 }"
+          @click="showMA10 = !showMA10"
+        >
+          MA10
+        </span>
+        <span
+          :class="{ hidden: !showMA50 }"
+          @click="showMA50 = !showMA50"
+        >
+          MA50
+        </span>
+      </div>
+
+
       <div id="chartTooltip" class="tooltip-container" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
         <div class="tooltip-content">
           <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
@@ -60,34 +88,6 @@
           </p>
         </div>
       </div>
-
-      <div class="chart-toggles">
-        <span
-          :class="{ hidden: !showPrice }"
-          @click="showPrice = !showPrice"
-        >
-          Price
-        </span>
-        <span
-          :class="{ hidden: !showRSI }"
-          @click="showRSI = !showRSI"
-        >
-          RSI
-        </span>
-        <span
-          :class="{ hidden: !showMA10 }"
-          @click="showMA10 = !showMA10"
-        >
-          MA10
-        </span>
-        <span
-          :class="{ hidden: !showMA50 }"
-          @click="showMA50 = !showMA50"
-        >
-          MA50
-        </span>
-      </div>
-
     </div>
   </div>
 </template>
@@ -440,8 +440,8 @@ export default {
               annotations: {
                 verticalLine: {
                   type: 'line' as const,
-                  xMin: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : "2024-12-15 04:00:00",
-                  xMax: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : "2024-12-15 04:00:00",
+                  xMin: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : '',
+                  xMax: selectedDataPoint.value ? new Date(selectedDataPoint.value.timestamp).getTime() : '',
                   borderColor: 'rgba(0, 0, 0, 0.5)',
                   borderWidth: 1,
                   borderDash: [5, 5],
@@ -480,6 +480,21 @@ export default {
         time: activeTime.value,
         pageLoad: true
       })
+
+      if (responseData.value.length > 0 && chartInstance) {
+        const lastPoint = responseData.value[responseData.value.length - 1]
+        const lastTimestamp = new Date(lastPoint.timestamp).getTime()
+        
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>
+        if (annotations?.verticalLine) {
+          annotations.verticalLine.xMin = lastTimestamp
+          annotations.verticalLine.xMax = lastTimestamp
+          chartInstance.update('none')
+        }
+        
+        selectedDataPoint.value = lastPoint
+      }
+
     })
 
     const updateChartData = () => {

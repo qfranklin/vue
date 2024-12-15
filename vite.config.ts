@@ -10,7 +10,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+    },
+    dedupe: ['chart.js', 'chartjs-plugin-annotation']
   },
   server: {
     port: 5173,
@@ -22,12 +23,9 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    include: ['chartjs-plugin-annotation']
-  },
   build: {
-    rollupOptions: {
-      external: ['chartjs-plugin-annotation']
+    commonjsOptions: {
+      include: [/node_modules/],
     }
   }
 })

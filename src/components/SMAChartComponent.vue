@@ -350,7 +350,7 @@ export default {
           responsive: true,
           scales: {
             x: {
-              display: true
+              display: false
             },
             y: {
               beginAtZero: false,

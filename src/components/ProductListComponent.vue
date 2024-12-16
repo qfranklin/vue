@@ -53,11 +53,11 @@ export default defineComponent({
     }
 
     const addProduct = () => {
-      router.push('/add-product')
+      router.push('/products/add')
     }
 
     const viewProduct = (productId: number) => {
-      router.push(`/product/${productId}`)
+      router.push(`/products/${productId}`)
     }
 
     onMounted(() => {

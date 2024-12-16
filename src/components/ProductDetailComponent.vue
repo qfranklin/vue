@@ -71,18 +71,23 @@ export default defineComponent({
       const formData = new FormData()
       formData.append('description', product.value.description)
       formData.append('price', product.value.price)
-      product.value.images.forEach((image, index) => {
-        formData.append(`images[${index}]`, image)
+
+      // Append deleted image names
+      const deletedImages = product.value.images.filter(image => typeof image === 'string' && !newImages.value.includes(image))
+      deletedImages.forEach((image, index) => {
+        formData.append(`deletedImages[${index}]`, image)
       })
-      newImages.value.forEach((image) => {
-        formData.append('newImages', image)
+
+      // Append new images
+      newImages.value.forEach((image, index) => {
+        formData.append(`newImages[${index}]`, image)
       })
 
       try {
-        await axios.put(`/api/products/${product.value.id}`, formData, {
+        await axios.post(`/api/products/${product.value.id}`, formData, {
           headers: {
-            Authorization: `Bearer ${userStore.token}`
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         })
         isEditing.value = false
         newImages.value = []
@@ -96,11 +101,7 @@ export default defineComponent({
       fetchProductDetails(productId)
     })
 
-    const uploadNewProduct = () => {
-      // Logic for uploading new product
-    }
-
-    return { product, isAdmin, isEditing, toggleEditMode, handleImageUpload, removeImage, saveChanges, uploadNewProduct, getImageUrl }
+    return { product, isAdmin, isEditing, toggleEditMode, handleImageUpload, removeImage, saveChanges, getImageUrl }
   }
 })
 </script>
@@ -118,12 +119,18 @@ export default defineComponent({
 
 .edit-button {
   position: absolute;
-  top: 0px;
-  right: 0px;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
   cursor: pointer;
   font-size: 20px;
+  z-index: 10;
+}
+
+.edit-actions {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .save-link {
@@ -162,7 +169,7 @@ export default defineComponent({
   position: absolute;
   top: 5px;
   right: 5px;
-  background: white;
+  background: none;
   border: none;
   cursor: pointer;
   font-size: 20px;
@@ -177,12 +184,14 @@ export default defineComponent({
 .product-price {
   font-size: 20px;
   color: #333;
+  text-align: center;
   margin-bottom: 20px;
 }
 
 .product-description {
   font-size: 16px;
   color: #333;
+  text-align: center;
   margin-bottom: 20px;
 }
 
@@ -194,19 +203,5 @@ export default defineComponent({
   border-radius: 4px;
   box-sizing: border-box;
   margin-bottom: 20px;
-}
-
-.upload-button {
-  background-color: #007BFF;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.upload-button:hover {
-  background-color: #0056b3;
 }
 </style>

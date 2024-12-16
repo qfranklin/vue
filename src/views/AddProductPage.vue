@@ -23,7 +23,6 @@
 import { defineComponent, ref } from 'vue'
 import axios from '@/axiosConfig'
 import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'AddProductPage',
@@ -32,11 +31,10 @@ export default defineComponent({
     const price = ref('')
     const images = ref<File[]>([])
     const router = useRouter()
-    const userStore = useUserStore()
 
     const handleImageUpload = (event: Event) => {
       const target = event.target as HTMLInputElement
-      if (target.files && target.files[0]) {
+      if (target.files) {
         images.value = Array.from(target.files)
       }
     }
@@ -45,24 +43,30 @@ export default defineComponent({
       const formData = new FormData()
       formData.append('description', description.value)
       formData.append('price', price.value)
-      images.value.forEach((image) => {
-        formData.append('images', image)
+      images.value.forEach((image, index) => {
+        formData.append(`images[${index}]`, image)
       })
 
       try {
         await axios.post('/api/products', formData, {
           headers: {
-            Authorization: `Bearer ${userStore.token}`
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         })
         router.push('/products')
       } catch (error) {
-        console.error('Failed to add product:', error)
+        console.error(error)
       }
     }
 
-    return { description, price, handleImageUpload, handleSubmit }
-  }
+    return {
+      description,
+      price,
+      images,
+      handleImageUpload,
+      handleSubmit,
+    }
+  },
 })
 </script>
 

@@ -1,13 +1,16 @@
 <template>
-  <div>
-    <div v-for="product in products" :key="product.id" @click="viewProduct(product.id)">
-      <h2>{{ product.description }}</h2>
-      <p>Price: ${{ product.price }}</p>
-      <div v-if="product.images && product.images.length">
-        <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
+  <div class="product-list-container">
+    <a v-if="isAdmin" @click="addProduct" class="add-product-link">Add Product</a>
+    <div class="product-list">
+      <div v-for="product in products" :key="product.id" class="product-card" @click="viewProduct(product.id)">
+        <div class="product-image" v-if="product.images && product.images.length">
+          <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
+        </div>
+        <div class="product-details">
+          <p class="product-price">${{ product.price }}</p>
+        </div>
       </div>
     </div>
-    <button v-if="isAdmin" @click="addProduct">Add Product</button>
   </div>
 </template>
 
@@ -42,14 +45,6 @@ export default defineComponent({
       }
     }
 
-    const viewProduct = (id: number) => {
-      router.push(`/products/${id}`)
-    }
-
-    const addProduct = () => {
-      router.push('/products/add')
-    }
-
     const getImageUrl = (imagePath: string) => {
       const baseUrl = process.env.NODE_ENV === 'production'
         ? 'https://qfranklin.xyz/storage'
@@ -57,15 +52,75 @@ export default defineComponent({
       return `${baseUrl}/${imagePath}`
     }
 
+    const addProduct = () => {
+      router.push('/add-product')
+    }
+
+    const viewProduct = (productId: number) => {
+      router.push(`/product/${productId}`)
+    }
+
     onMounted(() => {
       fetchProducts()
     })
 
-    return { products, viewProduct, isAdmin, addProduct, getImageUrl }
+    return { products, isAdmin, addProduct, viewProduct, getImageUrl }
   }
 })
 </script>
 
 <style scoped>
-/* Add your styles here */
+.product-list-container {
+  padding: 20px;
+}
+
+.add-product-link {
+  color: #007BFF;
+  text-decoration: none;
+  font-size: 16px;
+  margin-bottom: 20px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.add-product-link:hover {
+  text-decoration: underline;
+  color: #0056b3;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.product-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  width: calc(33.333% - 20px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: scale(1.05);
+}
+
+.product-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.product-details {
+  padding: 15px;
+}
+
+.product-price {
+  font-size: 16px;
+  color: #888;
+}
 </style>

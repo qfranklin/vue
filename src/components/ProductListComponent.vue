@@ -1,5 +1,5 @@
 <template>
-  <div class="product-list-container">
+  <div>
     <a v-if="isAdmin" @click="addProduct" class="add-product-link">Add Product</a>
     <div class="product-list">
       <div v-for="product in products" :key="product.id" class="product-card" @click="viewProduct(product.id)">
@@ -70,9 +70,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.product-list-container {
-  padding: 20px;
-}
 
 .add-product-link {
   color: #007BFF;
@@ -99,7 +96,7 @@ export default defineComponent({
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
-  width: calc(33.333% - 20px);
+  width: calc(33.333%);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s;
@@ -122,5 +119,11 @@ export default defineComponent({
 .product-price {
   font-size: 16px;
   color: #888;
+}
+
+@media (max-width: 768px) {
+  .product-card {
+    width: calc(50%);
+  }
 }
 </style>

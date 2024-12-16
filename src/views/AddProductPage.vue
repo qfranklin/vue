@@ -1,20 +1,20 @@
 <template>
-  <div>
+  <div class="add-product-container">
     <h1>Add Product</h1>
-    <form @submit.prevent="handleSubmit">
-      <div>
+    <form @submit.prevent="handleSubmit" class="add-product-form">
+      <div class="form-group">
         <label for="description">Description:</label>
         <input type="text" id="description" v-model="description" required />
       </div>
-      <div>
+      <div class="form-group">
         <label for="price">Price:</label>
         <input type="text" id="price" v-model="price" required />
       </div>
-      <div>
+      <div class="form-group">
         <label for="images">Image:</label>
         <input type="file" id="images" @change="handleImageUpload" multiple required />
       </div>
-      <button type="submit">Add Product</button>
+      <button type="submit" class="submit-button">Add Product</button>
     </form>
   </div>
 </template>
@@ -45,8 +45,8 @@ export default defineComponent({
       const formData = new FormData()
       formData.append('description', description.value)
       formData.append('price', price.value)
-      images.value.forEach((image, index) => {
-        formData.append(`images[${index}]`, image)
+      images.value.forEach((image) => {
+        formData.append('images', image)
       })
 
       try {
@@ -67,5 +67,56 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Add your styles here */
+.add-product-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.submit-button {
+  background-color: #007BFF;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
 </style>

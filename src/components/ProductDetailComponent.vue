@@ -35,6 +35,7 @@ export default defineComponent({
     const isAdmin = ref(userStore.isAdmin)
     const isEditing = ref(false)
     const newImages = ref<File[]>([])
+    const deletedImages = ref<string[]>([])
 
     const fetchProductDetails = async (productId: number) => {
       try {
@@ -64,6 +65,10 @@ export default defineComponent({
     }
 
     const removeImage = (index: number) => {
+      const image = product.value.images[index]
+      if (typeof image === 'string') {
+        deletedImages.value.push(image)
+      }
       product.value.images.splice(index, 1)
     }
 
@@ -73,8 +78,7 @@ export default defineComponent({
       formData.append('price', product.value.price)
 
       // Append deleted image names
-      const deletedImages = product.value.images.filter(image => typeof image === 'string' && !newImages.value.includes(image))
-      deletedImages.forEach((image, index) => {
+      deletedImages.value.forEach((image, index) => {
         formData.append(`deletedImages[${index}]`, image)
       })
 

@@ -123,7 +123,7 @@ export default defineComponent({
 
 @media (max-width: 768px) {
   .product-card {
-    width: calc(50%);
+    width: calc(100%);
   }
 }
 </style>

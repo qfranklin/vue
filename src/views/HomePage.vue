@@ -16,7 +16,7 @@ import LifepathComponent from '@/components/LifepathComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
-  name: 'AboutPage',
+  name: 'HomePage',
   components: {
     NotesComponent,
     FinancialChartComponent,

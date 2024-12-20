@@ -163,7 +163,7 @@ export default {
   name: 'FinancialChartComponent',
   setup() {
     const activeCrypto: Ref<CryptoType> = ref('bitcoin')
-    const activeTime: Ref<TimeType> = ref('hourly')
+    const activeTime: Ref<TimeType> = ref('24h')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     let chartInstance: Chart | null = null
@@ -185,7 +185,7 @@ export default {
       data: null
     })
     const formatDate = (timestamp: string, timeFormat: TimeType): string => {
-      if (timeFormat === 'hourly') {
+      if (timeFormat === '24h') {
         return format(new Date(timestamp), 'ha').toLowerCase()
       }
       const date = new Date(timestamp)
@@ -218,7 +218,7 @@ export default {
         });
 
         responseData.value = response.data.map((item: ApiResponseItem): CryptoDataPoint => ({
-          timestamp: time === 'hourly'
+          timestamp: time === '24h'
             ? format(
                 new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }),
                 'yyyy-MM-dd HH:mm:ss'
@@ -442,12 +442,12 @@ export default {
                   type: 'line' as const,
                   xMin: selectedDataPoint.value
                     ? new Date(selectedDataPoint.value.timestamp).getTime()
-                    : activeTime.value === 'hourly'
+                    : activeTime.value === '24h'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
                   xMax: selectedDataPoint.value
                     ? new Date(selectedDataPoint.value.timestamp).getTime()
-                    : activeTime.value === 'hourly'
+                    : activeTime.value === '24h'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
                   borderColor: 'rgba(0, 0, 0, 0.5)',

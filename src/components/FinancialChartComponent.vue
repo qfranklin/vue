@@ -282,14 +282,14 @@ export default {
       const chartConfiguration: ChartConfiguration = {
         type: 'candlestick',
         data: {
-          labels: responseData.value.map(item => item.timestamp),
+          labels: responseData.value.slice(1).map(item => item.timestamp),
           datasets: [
             {
               label: 'Price',
               type: 'candlestick',
-              data: responseData.value.map((item, index): CandlestickData => ({
+              data: responseData.value.slice(1).map((item, index): CandlestickData => ({
                 x: new Date(item.timestamp).getTime(),
-                o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+                o: index === 0 ? responseData.value[0].current_price : responseData.value[index].current_price,
                 h: item.high_24h,
                 l: item.low_24h,
                 c: item.current_price,
@@ -301,7 +301,7 @@ export default {
             {
               label: 'MA 10',
               type: 'line',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
                 y: item.ma_10,
               })),
@@ -316,9 +316,9 @@ export default {
             {
               label: 'MA 50',
               type: 'line',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
-                y: item.ma_50,
+                y: item.ma_10,
               })),
               borderColor: 'rgba(51, 51, 51, 0.25)',
               backgroundColor: 'rgba(51, 51, 51, 0.25)',
@@ -332,7 +332,7 @@ export default {
               label: 'RSI',
               type: 'line',
               yAxisID: 'y-rsi',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
                 y: item.rsi,
               })),
@@ -511,28 +511,28 @@ export default {
         const low24hValues = responseData.value.map(item => item.low_24h);
         const high24hValues = responseData.value.map(item => item.high_24h);
 
-        chartInstance.data.labels = responseData.value.map(item => item.timestamp)
+        chartInstance.data.labels = responseData.value.slice(1).map(item => item.timestamp)
         chartInstance.data.datasets.forEach((dataset) => {
           if (dataset.label === 'Price') {
-            dataset.data = responseData.value.map((item, index): CandlestickData => ({
+            dataset.data = responseData.value.slice(1).map((item, index): CandlestickData => ({
               x: new Date(item.timestamp).getTime(),
-              o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+              o: index === 0 ? responseData.value[0].current_price : responseData.value[index].current_price,
               h: item.high_24h,
               l: item.low_24h,
               c: item.current_price,
             }))
           } else if (dataset.label === 'MA 10') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.ma_10,
             }))
           } else if (dataset.label === 'MA 50') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.ma_50,
             }))
           } else if (dataset.label === 'RSI') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.rsi,
             }))

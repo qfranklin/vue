@@ -160,7 +160,7 @@ interface LineData {
 }
 
 export default {
-  name: 'SMAChartComponent',
+  name: 'FinancialChartComponent',
   setup() {
     const activeCrypto: Ref<CryptoType> = ref('bitcoin')
     const activeTime: Ref<TimeType> = ref('hourly')
@@ -440,13 +440,13 @@ export default {
               annotations: {
                 verticalLine: {
                   type: 'line' as const,
-                  xMin: selectedDataPoint.value 
-                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
+                  xMin: selectedDataPoint.value
+                    ? new Date(selectedDataPoint.value.timestamp).getTime()
                     : activeTime.value === 'hourly'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
-                  xMax: selectedDataPoint.value 
-                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
+                  xMax: selectedDataPoint.value
+                    ? new Date(selectedDataPoint.value.timestamp).getTime()
                     : activeTime.value === 'hourly'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
@@ -492,14 +492,14 @@ export default {
       if (responseData.value.length > 0 && chartInstance) {
         const lastPoint = responseData.value[responseData.value.length - 1]
         const lastTimestamp = new Date(lastPoint.timestamp).getTime()
-        
+
         const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>
         if (annotations?.verticalLine) {
           annotations.verticalLine.xMin = lastTimestamp
           annotations.verticalLine.xMax = lastTimestamp
           chartInstance.update('none')
         }
-        
+
         selectedDataPoint.value = lastPoint
       }
 

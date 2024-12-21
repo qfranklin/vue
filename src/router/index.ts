@@ -6,6 +6,7 @@ import AdminPage from '../views/AdminPage.vue'
 import ProductsPage from '../views/ProductsPage.vue'
 import ProductDetailPage from '../views/ProductDetailPage.vue'
 import AddProductPage from '../views/AddProductPage.vue'
+import UsersPage from '../views/UsersPage.vue'
 import { useUserStore } from '@/stores/user'
 
 const routes = [
@@ -44,6 +45,12 @@ const routes = [
     path: '/products/add',
     name: 'AddProduct',
     component: AddProductPage,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/users',
+    name: 'Users',
+    component: UsersPage,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

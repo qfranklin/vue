@@ -56,9 +56,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.main-content {
-  padding-top: 4rem;
-}
 form {
   display: flex;
   flex-direction: column;

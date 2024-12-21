@@ -649,10 +649,6 @@ canvas {
   max-width: 100%;
 }
 
-body {
-    background-color: #f5f5f5;
-}
-
 .chart-toggles {
   display: flex;
   gap: 5px;

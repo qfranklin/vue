@@ -84,9 +84,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.main-content {
-  padding-top: 4rem; /* Adjust this value based on the height of your header */
-}
 
 form {
   display: flex;

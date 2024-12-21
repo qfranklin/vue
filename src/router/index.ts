@@ -7,6 +7,7 @@ import ProductsPage from '../views/ProductsPage.vue'
 import ProductDetailPage from '../views/ProductDetailPage.vue'
 import AddProductPage from '../views/AddProductPage.vue'
 import UsersPage from '../views/UsersPage.vue'
+import UserDetailsPage from '../views/UserDetailsPage.vue'
 import { useUserStore } from '@/stores/user'
 
 const routes = [
@@ -52,6 +53,12 @@ const routes = [
     name: 'Users',
     component: UsersPage,
     meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/user-details',
+    name: 'UserDetails',
+    component: UserDetailsPage,
+    meta: { requiresAuth: true }
   }
 ]
 

@@ -48,7 +48,7 @@ export const CRYPTO_MAPPING = {
 } as const;
 
 export const TIME_MAPPING = {
-  '24h': 'hourly',
+  '24h': '24h',
   '7d': '7d',
   '30d': '30d',
 } as const;

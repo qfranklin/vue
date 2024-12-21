@@ -160,10 +160,10 @@ interface LineData {
 }
 
 export default {
-  name: 'SMAChartComponent',
+  name: 'FinancialChartComponent',
   setup() {
     const activeCrypto: Ref<CryptoType> = ref('bitcoin')
-    const activeTime: Ref<TimeType> = ref('hourly')
+    const activeTime: Ref<TimeType> = ref('24h')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     let chartInstance: Chart | null = null
@@ -185,7 +185,7 @@ export default {
       data: null
     })
     const formatDate = (timestamp: string, timeFormat: TimeType): string => {
-      if (timeFormat === 'hourly') {
+      if (timeFormat === '24h') {
         return format(new Date(timestamp), 'ha').toLowerCase()
       }
       const date = new Date(timestamp)
@@ -218,7 +218,7 @@ export default {
         });
 
         responseData.value = response.data.map((item: ApiResponseItem): CryptoDataPoint => ({
-          timestamp: time === 'hourly'
+          timestamp: time === '24h'
             ? format(
                 new Date(item.timestamp).toLocaleString('en-US', { timeZone: 'America/New_York' }),
                 'yyyy-MM-dd HH:mm:ss'
@@ -282,14 +282,14 @@ export default {
       const chartConfiguration: ChartConfiguration = {
         type: 'candlestick',
         data: {
-          labels: responseData.value.map(item => item.timestamp),
+          labels: responseData.value.slice(1).map(item => item.timestamp),
           datasets: [
             {
               label: 'Price',
               type: 'candlestick',
-              data: responseData.value.map((item, index): CandlestickData => ({
+              data: responseData.value.slice(1).map((item, index): CandlestickData => ({
                 x: new Date(item.timestamp).getTime(),
-                o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+                o: index === 0 ? responseData.value[0].current_price : responseData.value[index].current_price,
                 h: item.high_24h,
                 l: item.low_24h,
                 c: item.current_price,
@@ -301,7 +301,7 @@ export default {
             {
               label: 'MA 10',
               type: 'line',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
                 y: item.ma_10,
               })),
@@ -316,9 +316,9 @@ export default {
             {
               label: 'MA 50',
               type: 'line',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
-                y: item.ma_50,
+                y: item.ma_10,
               })),
               borderColor: 'rgba(51, 51, 51, 0.25)',
               backgroundColor: 'rgba(51, 51, 51, 0.25)',
@@ -332,7 +332,7 @@ export default {
               label: 'RSI',
               type: 'line',
               yAxisID: 'y-rsi',
-              data: responseData.value.map((item): LineData => ({
+              data: responseData.value.slice(1).map((item): LineData => ({
                 x: new Date(item.timestamp).getTime(),
                 y: item.rsi,
               })),
@@ -440,14 +440,14 @@ export default {
               annotations: {
                 verticalLine: {
                   type: 'line' as const,
-                  xMin: selectedDataPoint.value 
-                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
-                    : activeTime.value === 'hourly'
+                  xMin: selectedDataPoint.value
+                    ? new Date(selectedDataPoint.value.timestamp).getTime()
+                    : activeTime.value === '24h'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
-                  xMax: selectedDataPoint.value 
-                    ? new Date(selectedDataPoint.value.timestamp).getTime() 
-                    : activeTime.value === 'hourly'
+                  xMax: selectedDataPoint.value
+                    ? new Date(selectedDataPoint.value.timestamp).getTime()
+                    : activeTime.value === '24h'
                       ? new Date(responseData.value[responseData.value.length - 1]?.timestamp).getTime()
                       : responseData.value[responseData.value.length - 1].timestamp,
                   borderColor: 'rgba(0, 0, 0, 0.5)',
@@ -492,14 +492,14 @@ export default {
       if (responseData.value.length > 0 && chartInstance) {
         const lastPoint = responseData.value[responseData.value.length - 1]
         const lastTimestamp = new Date(lastPoint.timestamp).getTime()
-        
+
         const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>
         if (annotations?.verticalLine) {
           annotations.verticalLine.xMin = lastTimestamp
           annotations.verticalLine.xMax = lastTimestamp
           chartInstance.update('none')
         }
-        
+
         selectedDataPoint.value = lastPoint
       }
 
@@ -511,28 +511,28 @@ export default {
         const low24hValues = responseData.value.map(item => item.low_24h);
         const high24hValues = responseData.value.map(item => item.high_24h);
 
-        chartInstance.data.labels = responseData.value.map(item => item.timestamp)
+        chartInstance.data.labels = responseData.value.slice(1).map(item => item.timestamp)
         chartInstance.data.datasets.forEach((dataset) => {
           if (dataset.label === 'Price') {
-            dataset.data = responseData.value.map((item, index): CandlestickData => ({
+            dataset.data = responseData.value.slice(1).map((item, index): CandlestickData => ({
               x: new Date(item.timestamp).getTime(),
-              o: index === 0 ? item.current_price : responseData.value[index - 1].current_price,
+              o: index === 0 ? responseData.value[0].current_price : responseData.value[index].current_price,
               h: item.high_24h,
               l: item.low_24h,
               c: item.current_price,
             }))
           } else if (dataset.label === 'MA 10') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.ma_10,
             }))
           } else if (dataset.label === 'MA 50') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.ma_50,
             }))
           } else if (dataset.label === 'RSI') {
-            dataset.data = responseData.value.map((item): LineData => ({
+            dataset.data = responseData.value.slice(1).map((item): LineData => ({
               x: new Date(item.timestamp).getTime(),
               y: item.rsi,
             }))

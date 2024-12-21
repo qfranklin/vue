@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import AboutPage from '../views/AboutPage.vue'
+import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import AdminPage from '../views/AdminPage.vue'
@@ -11,8 +11,8 @@ import { useUserStore } from '@/stores/user'
 const routes = [
   {
     path: '/',
-    name: 'AboutPage',
-    component: AboutPage
+    name: 'HomePage',
+    component: HomePage
   },
   {
     path: '/login',
@@ -59,7 +59,7 @@ router.beforeEach((to, from, next) => {
     if (!userStore.isLoggedIn) {
       next({ name: 'Login' })
     } else if (to.matched.some(record => record.meta.requiresAdmin) && !userStore.isAdmin) {
-      next({ name: 'AboutPage' })
+      next({ name: 'HomePage' })
     } else {
       next()
     }

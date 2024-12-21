@@ -89,22 +89,18 @@
         </div>
       </div>
     </div>
+    <div v-if="!isAdmin" class="disclaimer">
+      Disclaimer: The information presented on this website is for informational purposes only and does not constitute financial advice. While we strive to provide accurate and up-to-date data, we do not guarantee its accuracy, completeness, or reliability. Cryptocurrency investments carry significant risk, and past performance is not indicative of future results. By using this website, you acknowledge and agree that we are not responsible for any financial losses or damages arising from the use of the information provided. Users are strongly encouraged to conduct their own research and consult with a qualified financial advisor before making any investment decisions.
+    </div>
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, ref, computed, onMounted, watch } from 'vue'
+import { useUserStore } from '@/stores/user'
 import axios from 'axios'
-import { ref, onMounted, watch } from 'vue'
-import type { Ref } from 'vue'
-import { Chart, registerables, Tooltip } from 'chart.js'
-import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
-import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
-import annotationPlugin from 'chartjs-plugin-annotation';
-import type { AnnotationOptions } from 'chartjs-plugin-annotation';
-import { format } from 'date-fns'
-import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash'
-
+import { format } from 'date-fns'
 import {
   CRYPTO_MAPPING,
   TIME_MAPPING,
@@ -115,6 +111,13 @@ import {
   type FetchCryptoDataParams,
   type TooltipData
 } from '@/types/chart'
+
+import { Chart, registerables, Tooltip } from 'chart.js'
+import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
+import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
+import annotationPlugin from 'chartjs-plugin-annotation';
+import type { AnnotationOptions } from 'chartjs-plugin-annotation';
+import 'chartjs-adapter-date-fns'
 
 declare module 'chart.js' {
   interface TooltipPositionerMap {
@@ -159,11 +162,13 @@ interface LineData {
   y: number;
 }
 
-export default {
+export default defineComponent({
   name: 'FinancialChartComponent',
   setup() {
-    const activeCrypto: Ref<CryptoType> = ref('bitcoin')
-    const activeTime: Ref<TimeType> = ref('24h')
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.isAdmin)
+    const activeCrypto = ref<CryptoType>('bitcoin')
+    const activeTime = ref<TimeType>('24h')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     let chartInstance: Chart | null = null
@@ -583,32 +588,40 @@ export default {
     watch([showPrice, showRSI, showMA10, showMA50], updateChart)
 
     return {
+      isAdmin,
+      showPrice,
+      showRSI,
+      showMA10,
+      showMA50,
+      fetchCryptoDataDebounced,
+      tooltipState,
+      formatDate,
+      fetchCryptoData,
       responseData,
       cryptoMapping: CRYPTO_MAPPING,
       timeMapping : TIME_MAPPING,
       activeCrypto,
       activeTime,
-      fetchCryptoDataDebounced,
       loading,
       selectedDataPoint,
-      fetchCryptoData,
-      tooltipState,
       handleCryptoClick,
-      handleTimeClick,
-      showPrice,
-      showRSI,
-      showMA10,
-      showMA50
+      handleTimeClick
     }
-  },
-}
+  }
+})
 </script>
 
-<style>
-
+<style scoped>
 .chart-container {
   position: relative;
   max-width: 100%;
+}
+
+.disclaimer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: red;
+  text-align: center;
 }
 
 .top-container, .bottom-container {

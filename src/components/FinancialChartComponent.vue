@@ -400,6 +400,7 @@ export default {
                     const prevTime = new Date(prev.timestamp).getTime();
                     return Math.abs(currTime - timestamp) < Math.abs(prevTime - timestamp) ? curr : prev;
                   });
+
                   const nearestTimestamp = new Date(nearestPoint.timestamp).getTime();
                   const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
                   if (annotations?.verticalLine) {
@@ -418,7 +419,7 @@ export default {
                 const { tooltip } = context
                 if (tooltip.dataPoints && tooltip.dataPoints.length > 0) {
                   const dataIndex = tooltip.dataPoints[0].dataIndex
-                  const dataPoint = responseData.value[dataIndex]
+                  const dataPoint = responseData.value[dataIndex + 1]
                   displayTooltip(dataPoint)
                   selectedDataPoint.value = dataPoint
                 } else {

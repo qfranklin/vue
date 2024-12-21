@@ -1,10 +1,10 @@
 <template>
   <section>
-    <FinancialChartComponent />
     <div v-if="isLoggedIn">
-      <NotesComponent />
       <LifepathComponent />
+      <NotesComponent />
     </div>
+    <FinancialChartComponent />
   </section>
 </template>
 

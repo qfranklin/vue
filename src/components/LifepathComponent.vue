@@ -146,7 +146,7 @@ export default defineComponent({
   padding: 5px 0;
   position: absolute;
   z-index: 1;
-  bottom: 125%;
+  top: 125%;
   left: 50%;
   margin-left: -110px;
   opacity: 0;

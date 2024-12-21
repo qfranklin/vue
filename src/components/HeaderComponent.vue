@@ -8,8 +8,14 @@
     <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
       <router-link v-if="!isLoggedIn" to="/register">Register</router-link>
-      <span v-if="isLoggedIn" class="user-email">{{ userEmail }}</span>
-      <button v-if="isLoggedIn" @click="logout">Logout</button>
+      <div v-if="isLoggedIn" class="dropdown">
+        <span class="user-name">{{ firstName }}</span>
+        <div class="dropdown-content">
+          <router-link to="/user-details">My Page</router-link>
+          <hr />
+          <button @click="logout">Logout</button>
+        </div>
+      </div>
     </nav>
   </header>
 </template>
@@ -25,7 +31,7 @@ export default defineComponent({
     const userStore = useUserStore()
     const router = useRouter()
     const isLoggedIn = computed(() => userStore.isLoggedIn)
-    const userEmail = computed(() => userStore.email)
+    const firstName = computed(() => userStore.name.split(' ')[0])
     const isAdmin = computed(() => userStore.isAdmin)
 
     const logout = () => {
@@ -37,7 +43,7 @@ export default defineComponent({
 
     return {
       isLoggedIn,
-      userEmail,
+      firstName,
       isAdmin,
       logout
     }
@@ -70,15 +76,45 @@ export default defineComponent({
 nav a {
   text-decoration: none;
   color: #007bff;
+  cursor: pointer;
 }
-.user-email {
-  font-size: 0.8rem;
-  margin-right: 1rem;
-}
-button {
-  background: none;
-  border: none;
+.user-name {
   color: #007bff;
   cursor: pointer;
+}
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.dropdown-content a, .dropdown-content button {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.dropdown-content hr {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid #ccc;
+}
+.dropdown-content a:hover, .dropdown-content button:hover {
+  background-color: #f1f1f1;
 }
 </style>

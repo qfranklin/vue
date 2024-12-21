@@ -1,21 +1,6 @@
 <template>
-  <div class="profile-info">
+  <div class="lifepath-info">
     <div>
-      <strong>Birthday:</strong>
-      <div class="editable-field" @click="startEdit">
-        <template v-if="isEditing">
-          <input type="date" v-model="editableBirthday" ref="dateInput" />
-          <button @click.stop="submitEdit">Save</button>
-          <button @click.stop="cancelEdit">Cancel</button>
-        </template>
-        <template v-else>
-          <span>{{ formattedBirthday }}</span>
-          <span class="edit-icon">✏️</span>
-        </template>
-      </div>
-      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
-      <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      <br>
       <div class="tooltip">
         <strong>Life Path Number:</strong> {{ lifePathNumber }}
         <a href="#" class="tooltip-icon" @click.prevent="toggleTooltip('lifePath')">?</a>
@@ -43,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue'
+import { defineComponent, ref, computed, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
@@ -56,10 +41,6 @@ export default defineComponent({
   name: 'LifepathComponent',
   setup() {
     const userStore = useUserStore()
-    const isEditing = ref(false)
-    const editableBirthday = ref(userStore.birthday.split('T')[0])
-    const successMessage = ref('')
-    const errorMessage = ref('')
     const loading = ref(true)
     const dailyPrediction = ref('')
     const dailyPredictionMessage = ref('')
@@ -69,62 +50,9 @@ export default defineComponent({
     const showTooltip = ref('')
     const dateInput = ref<HTMLInputElement | null>(null)
 
-    watch(() => userStore.birthday, (newBirthday) => {
-      editableBirthday.value = newBirthday.split('T')[0]
-    })
-
-    const getOrdinalSuffix = (day: number) => {
-      if (day > 3 && day < 21) return 'th'
-      switch (day % 10) {
-        case 1: return 'st'
-        case 2: return 'nd'
-        case 3: return 'rd'
-        default: return 'th'
-      }
-    }
-
-    const formattedBirthday = computed(() => {
-      if (!userStore.birthday) return ''
-      const date = new Date(userStore.birthday)
-      const day = date.getUTCDate()
-      const month = date.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })
-      const year = date.getUTCFullYear()
-      return `${month} ${day}${getOrdinalSuffix(day)}, ${year}`
-    })
-
-    const startEdit = () => {
-      isEditing.value = true
-      nextTick(() => {
-        dateInput.value?.focus()
-        dateInput.value?.showPicker()
-      })
-    }
-
-    const cancelEdit = () => {
-      isEditing.value = false
-      editableBirthday.value = userStore.birthday.split('T')[0]
-    }
-
-    const submitEdit = async () => {
-      try {
-        const formattedDate = new Date(editableBirthday.value).toISOString().split('T')[0]
-        await axios.post('/api/user/update', {
-          birthday: formattedDate
-        })
-        userStore.setBirthday(formattedDate)
-        successMessage.value = 'Birthday updated successfully!'
-        errorMessage.value = ''
-        isEditing.value = false
-      } catch {
-        errorMessage.value = 'Failed to update birthday. Please try again.'
-        successMessage.value = ''
-      }
-    }
-
     const fetchUserData = async () => {
       try {
         const response = await axios.get('/api/user')
-        userStore.setBirthday(response.data.birthday)
         dailyPrediction.value = response.data.numerology.daily_prediction
         dailyPredictionMessage.value = `Today is a ${dailyPrediction.value} day for you.`
         lifePathNumber.value = response.data.numerology.life_path_number
@@ -176,20 +104,12 @@ export default defineComponent({
     })
 
     return {
-      isEditing,
-      editableBirthday,
-      successMessage,
-      errorMessage,
       loading,
       dailyPredictionMessage,
       lifePathNumber,
       universalDayNumber,
       personalDayNumber,
       showTooltip,
-      formattedBirthday,
-      startEdit,
-      cancelEdit,
-      submitEdit,
       toggleTooltip,
       lifePathTooltip,
       universalDayTooltip,
@@ -201,28 +121,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.profile-info {
+.lifepath-info {
   max-width: 600px;
   text-align: left;
-}
-.editable-field {
-  display: inline-flex;
-  align-items: center;
-  background-color: #f0f0f0;
-  padding: 0.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.edit-icon {
-  margin-left: 0.5rem;
-  cursor: pointer;
-  color: #888;
-}
-.success-message {
-  color: green;
-}
-.error-message {
-  color: red;
 }
 .loading-spinner {
   margin-top: 1rem;

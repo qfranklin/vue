@@ -22,5 +22,6 @@ export default defineComponent({
   padding-top: 4rem;
   padding-left: 2rem;
   padding-right: 2rem;
+  padding-bottom: 2rem;
 }
 </style>

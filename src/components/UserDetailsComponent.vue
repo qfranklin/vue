@@ -21,30 +21,41 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
-import { useUserStore } from '@/stores/user'
+import { defineComponent, ref, onMounted } from 'vue'
 import axios from '@/axiosConfig'
+import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'UserDetailsComponent',
   setup() {
     const userStore = useUserStore()
-    const name = ref(userStore.name)
-    const email = ref(userStore.email)
-    const birthday = ref(userStore.birthday.split('T')[0])
+    const name = ref('')
+    const email = ref('')
+    const birthday = ref('')
     const successMessage = ref('')
     const errorMessage = ref('')
 
-    watch(() => userStore.birthday, (newBirthday) => {
-      birthday.value = newBirthday.split('T')[0]
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get('/api/user')
+        if (response.status === 200) {
+          const user = response.data
+          name.value = user.name
+          email.value = user.email
+          birthday.value = user.birthday.split('T')[0]
+        } else {
+          throw new Error('Failed to fetch user details.')
+        }
+      } catch {
+        errorMessage.value = 'Failed to fetch user details. Please try again later.'
+      }
+    }
+
+    onMounted(() => {
+      fetchUserDetails()
     })
 
     const updateProfile = async () => {
-      if (!userStore.isLoggedIn || (!userStore.isAdmin && userStore.userId !== userStore.userId)) {
-        errorMessage.value = 'You are not authorized to update this profile.'
-        return
-      }
-
       try {
         const response = await axios.post('/api/user/update', {
           name: name.value,

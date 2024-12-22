@@ -71,11 +71,11 @@
             {{ tooltipState.data.current_price.toFixed(2) }}
           </p>
           <p v-if="showPrice" class="tooltip-item">
-            <span class="tooltip-label">24h High:</span>
+            <span class="tooltip-label">High:</span>
             {{ tooltipState.data.high_24h.toFixed(2) }}
           </p>
           <p v-if="showPrice" class="tooltip-item">
-            <span class="tooltip-label">24h Low:</span>
+            <span class="tooltip-label">Low:</span>
             {{ tooltipState.data.low_24h.toFixed(2) }}
           </p>
           <p v-if="showMA10" class="tooltip-item">

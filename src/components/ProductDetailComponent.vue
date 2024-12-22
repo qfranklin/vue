@@ -1,7 +1,7 @@
 <template>
   <button v-if="isAdmin && !isEditing" @click="toggleEditMode" class="edit-button">✏️</button>
 
-  <div v-if="isMobile && product.images && product.images.length" class="carousel-container">
+  <div v-if="isMobile && product.images && product.images.length" class="carousel-container" v-touch:swipe.left="nextImage" v-touch:swipe.right="prevImage">
     <div class="carousel-wrapper">
       <div
         class="carousel-inner"

@@ -9,6 +9,7 @@ export interface TimeMapping {
 
 export interface CryptoDataPoint {
   timestamp: string;
+  lifepath_number: string;
   current_price: number;
   high_24h: number;
   low_24h: number;
@@ -19,6 +20,7 @@ export interface CryptoDataPoint {
 
 export interface ApiResponseItem {
   timestamp: string;
+  lifepath_number: string;
   current_price: string;
   high_24h: string;
   low_24h: string;
@@ -51,6 +53,7 @@ export const TIME_MAPPING = {
   '24h': '24h',
   '7d': '7d',
   '30d': '30d',
+  'Max': 'max',
 } as const;
 
 export type CryptoType = typeof CRYPTO_MAPPING[keyof typeof CRYPTO_MAPPING]

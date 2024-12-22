@@ -62,6 +62,10 @@
       <div id="chartTooltip" class="tooltip-container" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
         <div class="tooltip-content">
           <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
+          <p class="tooltip-item">
+            <span class="tooltip-label">Lifepath:</span>
+            {{ tooltipState.data.lifepath_number }}
+          </p>
           <p v-if="showPrice" class="tooltip-item">
             <span class="tooltip-label">Price:</span>
             {{ tooltipState.data.current_price.toFixed(2) }}
@@ -195,6 +199,11 @@ export default defineComponent({
       }
       const date = new Date(timestamp)
       const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+
+      if (timeFormat === 'max') {
+        return format(utcDate, 'MM/dd/yyyy');
+      }
+
       return format(utcDate, 'MM/dd')
     }
 
@@ -229,6 +238,7 @@ export default defineComponent({
                 'yyyy-MM-dd HH:mm:ss'
               )
             : item.timestamp,
+          lifepath_number: item.lifepath_number,
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -246,6 +256,12 @@ export default defineComponent({
 
         if (responseData.value.length > 0) {
           displayTooltip(responseData.value[responseData.value.length - 1]);
+        }
+
+        if (time === 'max') {
+          addHalvingAnnotations();
+        } else {
+          removeHalvingAnnotations();
         }
 
       } catch (error) {
@@ -584,6 +600,48 @@ export default defineComponent({
         chartInstance.update('none')
       }
     }
+
+    const addHalvingAnnotations = () => {
+      if (chartInstance) {
+        const halvingDates = [
+          new Date('2012-11-28').getTime(),
+          new Date('2016-07-09').getTime(),
+          new Date('2020-05-11').getTime(),
+          new Date('2024-04-20').getTime(),
+        ];
+
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+        halvingDates.forEach((date, index) => {
+          annotations[`halvingLine${index}`] = {
+            type: 'line',
+            xMin: date,
+            xMax: date,
+            borderColor: 'rgba(255, 0, 0, 0.5)',
+            borderWidth: 1,
+            borderDash: [5, 5],
+            label: {
+              display: true,
+              content: new Date(date).toLocaleDateString(),
+              position: 'start'
+            }
+          };
+        });
+
+        chartInstance.update('none');
+      }
+    };
+
+    const removeHalvingAnnotations = () => {
+      if (chartInstance) {
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+        Object.keys(annotations).forEach(key => {
+          if (key.startsWith('halvingLine')) {
+            delete annotations[key];
+          }
+        });
+        chartInstance.update('none');
+      }
+    };
 
     watch([showPrice, showRSI, showMA10, showMA50], updateChart)
 

@@ -21,7 +21,7 @@
       <br>
       <div v-if="loading" class="loading-spinner">Loading...</div>
       <div v-else>
-        <strong>Daily Prediction:</strong> {{ dailyPredictionMessage }}
+        <strong>Daily Compatibility:</strong> {{ dailyCompatibilityMessage }}
       </div>
     </div>
   </div>
@@ -42,8 +42,8 @@ export default defineComponent({
   setup() {
     const userStore = useUserStore()
     const loading = ref(true)
-    const dailyPrediction = ref('')
-    const dailyPredictionMessage = ref('')
+    const dailyCompatibility = ref('')
+    const dailyCompatibilityMessage = ref('')
     const lifePathNumber = ref(null)
     const universalDayNumber = ref(null)
     const personalDayNumber = ref(null)
@@ -53,8 +53,8 @@ export default defineComponent({
     const fetchUserData = async () => {
       try {
         const response = await axios.get('/api/user')
-        dailyPrediction.value = response.data.numerology.daily_prediction
-        dailyPredictionMessage.value = `Today is a ${dailyPrediction.value} day for you.`
+        dailyCompatibility.value = response.data.numerology.daily_compatibility
+        dailyCompatibilityMessage.value = `Today is a ${dailyCompatibility.value} day for you.`
         lifePathNumber.value = response.data.numerology.life_path_number
         universalDayNumber.value = response.data.numerology.universal_day_number
         personalDayNumber.value = response.data.numerology.personal_day_number
@@ -105,7 +105,7 @@ export default defineComponent({
 
     return {
       loading,
-      dailyPredictionMessage,
+      dailyCompatibilityMessage,
       lifePathNumber,
       universalDayNumber,
       personalDayNumber,

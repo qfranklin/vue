@@ -1,8 +1,8 @@
 <template>
   <section>
     <div v-if="isLoggedIn">
-      <LifepathComponent />
       <NotesComponent />
+      <LifepathComponent />
     </div>
     <FinancialChartComponent />
   </section>

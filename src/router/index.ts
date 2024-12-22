@@ -8,6 +8,7 @@ import ProductDetailPage from '../views/ProductDetailPage.vue'
 import AddProductPage from '../views/AddProductPage.vue'
 import UsersPage from '../views/UsersPage.vue'
 import UserDetailsPage from '../views/UserDetailsPage.vue'
+import QRCodePage from '../views/QRCodePage.vue'
 import { useUserStore } from '@/stores/user'
 
 const routes = [
@@ -58,6 +59,12 @@ const routes = [
     path: '/user-details',
     name: 'UserDetails',
     component: UserDetailsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/generate-stl',
+    name: 'QRCode',
+    component: QRCodePage,
     meta: { requiresAuth: true }
   }
 ]

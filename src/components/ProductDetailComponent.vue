@@ -2,10 +2,7 @@
   <button v-if="isAdmin && !isEditing" @click="toggleEditMode" class="edit-button">✏️</button>
 
   <div v-if="isMobile && product.images && product.images.length" class="carousel-container">
-    <div class="carousel-wrapper"
-      v-touch:swipeleft="nextImage"
-      v-touch:swiperight="prevImage"
-    >
+    <div class="carousel-wrapper">
       <div
         class="carousel-inner"
         :style="{ transform: `translateX(-${currentIndex * 100}%)` }"

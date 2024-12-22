@@ -62,6 +62,10 @@
       <div id="chartTooltip" class="tooltip-container" :style="{ opacity: tooltipState.isVisible ? 1 : 0 }" v-if="tooltipState.data">
         <div class="tooltip-content">
           <p class="tooltip-date">{{ tooltipState.formattedDate }}</p>
+          <p class="tooltip-item">
+            <span class="tooltip-label">Lifepath:</span>
+            {{ tooltipState.data.lifepath_number }}
+          </p>
           <p v-if="showPrice" class="tooltip-item">
             <span class="tooltip-label">Price:</span>
             {{ tooltipState.data.current_price.toFixed(2) }}
@@ -89,22 +93,18 @@
         </div>
       </div>
     </div>
+    <div v-if="!isAdmin" class="disclaimer">
+      Disclaimer: The information presented on this website is for informational purposes only and does not constitute financial advice. While we strive to provide accurate and up-to-date data, we do not guarantee its accuracy, completeness, or reliability. Cryptocurrency investments carry significant risk, and past performance is not indicative of future results. By using this website, you acknowledge and agree that we are not responsible for any financial losses or damages arising from the use of the information provided. Users are strongly encouraged to conduct their own research and consult with a qualified financial advisor before making any investment decisions.
+    </div>
   </div>
 </template>
 
 <script lang="ts">
+import { defineComponent, ref, computed, onMounted, watch } from 'vue'
+import { useUserStore } from '@/stores/user'
 import axios from 'axios'
-import { ref, onMounted, watch } from 'vue'
-import type { Ref } from 'vue'
-import { Chart, registerables, Tooltip } from 'chart.js'
-import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
-import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
-import annotationPlugin from 'chartjs-plugin-annotation';
-import type { AnnotationOptions } from 'chartjs-plugin-annotation';
-import { format } from 'date-fns'
-import 'chartjs-adapter-date-fns'
 import { debounce } from 'lodash'
-
+import { format } from 'date-fns'
 import {
   CRYPTO_MAPPING,
   TIME_MAPPING,
@@ -115,6 +115,13 @@ import {
   type FetchCryptoDataParams,
   type TooltipData
 } from '@/types/chart'
+
+import { Chart, registerables, Tooltip } from 'chart.js'
+import type { TooltipItem, TooltipModel, ActiveElement, ChartConfiguration } from 'chart.js'
+import { CandlestickController, CandlestickElement, OhlcElement } from 'chartjs-chart-financial'
+import annotationPlugin from 'chartjs-plugin-annotation';
+import type { AnnotationOptions } from 'chartjs-plugin-annotation';
+import 'chartjs-adapter-date-fns'
 
 declare module 'chart.js' {
   interface TooltipPositionerMap {
@@ -159,11 +166,13 @@ interface LineData {
   y: number;
 }
 
-export default {
+export default defineComponent({
   name: 'FinancialChartComponent',
   setup() {
-    const activeCrypto: Ref<CryptoType> = ref('bitcoin')
-    const activeTime: Ref<TimeType> = ref('24h')
+    const userStore = useUserStore()
+    const isAdmin = computed(() => userStore.isAdmin)
+    const activeCrypto = ref<CryptoType>('bitcoin')
+    const activeTime = ref<TimeType>('24h')
     const responseData = ref<CryptoDataPoint[]>([])
     const selectedDataPoint = ref<CryptoDataPoint | null>(null)
     let chartInstance: Chart | null = null
@@ -190,6 +199,11 @@ export default {
       }
       const date = new Date(timestamp)
       const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+
+      if (timeFormat === 'max') {
+        return format(utcDate, 'MM/dd/yyyy');
+      }
+
       return format(utcDate, 'MM/dd')
     }
 
@@ -224,6 +238,7 @@ export default {
                 'yyyy-MM-dd HH:mm:ss'
               )
             : item.timestamp,
+          lifepath_number: item.lifepath_number,
           current_price: parseFloat(item.current_price),
           high_24h: parseFloat(item.high_24h),
           low_24h: parseFloat(item.low_24h),
@@ -241,6 +256,12 @@ export default {
 
         if (responseData.value.length > 0) {
           displayTooltip(responseData.value[responseData.value.length - 1]);
+        }
+
+        if (time === 'max') {
+          addHalvingAnnotations();
+        } else {
+          removeHalvingAnnotations();
         }
 
       } catch (error) {
@@ -580,35 +601,85 @@ export default {
       }
     }
 
+    const addHalvingAnnotations = () => {
+      if (chartInstance) {
+        const halvingDates = [
+          new Date('2012-11-28').getTime(),
+          new Date('2016-07-09').getTime(),
+          new Date('2020-05-11').getTime(),
+          new Date('2024-04-20').getTime(),
+        ];
+
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+        halvingDates.forEach((date, index) => {
+          annotations[`halvingLine${index}`] = {
+            type: 'line',
+            xMin: date,
+            xMax: date,
+            borderColor: 'rgba(255, 0, 0, 0.5)',
+            borderWidth: 1,
+            borderDash: [5, 5],
+            label: {
+              display: true,
+              content: new Date(date).toLocaleDateString(),
+              position: 'start'
+            }
+          };
+        });
+
+        chartInstance.update('none');
+      }
+    };
+
+    const removeHalvingAnnotations = () => {
+      if (chartInstance) {
+        const annotations = chartInstance?.options?.plugins?.annotation?.annotations as Record<string, AnnotationOptions<'line'>>;
+        Object.keys(annotations).forEach(key => {
+          if (key.startsWith('halvingLine')) {
+            delete annotations[key];
+          }
+        });
+        chartInstance.update('none');
+      }
+    };
+
     watch([showPrice, showRSI, showMA10, showMA50], updateChart)
 
     return {
+      isAdmin,
+      showPrice,
+      showRSI,
+      showMA10,
+      showMA50,
+      fetchCryptoDataDebounced,
+      tooltipState,
+      formatDate,
+      fetchCryptoData,
       responseData,
       cryptoMapping: CRYPTO_MAPPING,
       timeMapping : TIME_MAPPING,
       activeCrypto,
       activeTime,
-      fetchCryptoDataDebounced,
       loading,
       selectedDataPoint,
-      fetchCryptoData,
-      tooltipState,
       handleCryptoClick,
-      handleTimeClick,
-      showPrice,
-      showRSI,
-      showMA10,
-      showMA50
+      handleTimeClick
     }
-  },
-}
+  }
+})
 </script>
 
-<style>
-
+<style scoped>
 .chart-container {
   position: relative;
   max-width: 100%;
+}
+
+.disclaimer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: red;
+  text-align: center;
 }
 
 .top-container, .bottom-container {

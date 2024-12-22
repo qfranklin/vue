@@ -26,9 +26,6 @@ export default defineConfig({
   build: {
     commonjsOptions: {
       include: [/node_modules/],
-    },
-    rollupOptions: {
-      external: ['vue3-touch-events']
     }
   }
 })

@@ -1,67 +1,68 @@
 <template>
-  <div class="product-detail-container">
-    <button v-if="isAdmin && !isEditing" @click="toggleEditMode" class="edit-button">✏️</button>
+  <button v-if="isAdmin && !isEditing" @click="toggleEditMode" class="edit-button">✏️</button>
 
-    <div v-if="isMobile && product.images && product.images.length" class="carousel-container">
-      <div class="carousel-wrapper">
+  <div v-if="isMobile && product.images && product.images.length" class="carousel-container">
+    <div class="carousel-wrapper"
+      v-touch:swipeleft="nextImage"
+      v-touch:swiperight="prevImage"
+    >
+      <div
+        class="carousel-inner"
+        :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
+      >
         <div
-          class="carousel-inner"
-          :style="{ transform: `translateX(-${currentIndex * 100}%)` }"
-        >
-          <div
-            v-for="(image, index) in product.images"
-            :key="index"
-            class="carousel-item"
-          >
-            <img :src="getImageUrl(image)" alt="Product Image" class="carousel-image" />
-            <button v-if="isEditing" @click="removeImage(index)" class="delete-image-button">🗑️</button>
-          </div>
-        </div>
-
-        <button
-          class="carousel-nav carousel-prev"
-          @click="prevImage"
-          v-if="currentIndex > 0"
-        >
-          &larr;
-        </button>
-        <button
-          class="carousel-nav carousel-next"
-          @click="nextImage"
-          v-if="currentIndex < product.images.length - 1"
-        >
-          &rarr;
-        </button>
-      </div>
-
-      <div class="carousel-dots">
-        <span
           v-for="(image, index) in product.images"
           :key="index"
-          class="dot"
-          :class="{ active: currentIndex === index }"
-          @click="setCurrentIndex(index)"
-        ></span>
+          class="carousel-item"
+        >
+          <img :src="getImageUrl(image)" alt="Product Image" class="carousel-image" />
+          <button v-if="isEditing" @click="removeImage(index)" class="delete-image-button">🗑️</button>
+        </div>
       </div>
+
+      <button
+        class="carousel-nav carousel-prev"
+        @click="prevImage"
+        v-if="currentIndex > 0"
+      >
+        &larr;
+      </button>
+      <button
+        class="carousel-nav carousel-next"
+        @click="nextImage"
+        v-if="currentIndex < product.images.length - 1"
+      >
+        &rarr;
+      </button>
     </div>
 
-    <div v-else-if="product.images && product.images.length" class="product-images">
-      <div v-for="(image, index) in product.images" :key="index" class="product-image">
-        <img :src="getImageUrl(image)" alt="Product Image" />
-        <button v-if="isEditing" @click="removeImage(index)" class="delete-image-button">🗑️</button>
-      </div>
+    <div class="carousel-dots">
+      <span
+        v-for="(image, index) in product.images"
+        :key="index"
+        class="dot"
+        :class="{ active: currentIndex === index }"
+        @click="setCurrentIndex(index)"
+      ></span>
     </div>
+  </div>
 
-    <div v-if="isEditing" class="upload-new-image">
-      <input type="file" @change="handleImageUpload" multiple />
+  <div v-else-if="product.images && product.images.length" class="product-images">
+    <div v-for="(image, index) in product.images" :key="index" class="product-image">
+      <img :src="getImageUrl(image)" alt="Product Image" />
+      <button v-if="isEditing" @click="removeImage(index)" class="delete-image-button">🗑️</button>
     </div>
-    <p class="product-price" v-if="!isEditing">Price: ${{ product.price }}</p>
-    <input v-if="isEditing" type="text" v-model="product.price" class="edit-input" placeholder="Price" />
-    <p class="product-description" v-if="!isEditing">{{ product.description }}</p>
-    <textarea v-if="isEditing" v-model="product.description" class="edit-textarea" placeholder="Description"></textarea>
-    <div v-if="isEditing" class="edit-actions">
-      <a @click="saveChanges" class="save-link">Save</a>
-    </div>
+  </div>
+
+  <div v-if="isEditing" class="upload-new-image">
+    <input type="file" @change="handleImageUpload" multiple />
+  </div>
+  <p class="product-price" v-if="!isEditing">Price: ${{ product.price }}</p>
+  <input v-if="isEditing" type="text" v-model="product.price" class="edit-input" placeholder="Price" />
+  <p class="product-description" v-if="!isEditing">{{ product.description }}</p>
+  <textarea v-if="isEditing" v-model="product.description" class="edit-textarea" placeholder="Description"></textarea>
+  <div v-if="isEditing" class="edit-actions">
+    <a @click="saveChanges" class="save-link">Save</a>
   </div>
 </template>
 
@@ -188,15 +189,6 @@ export default defineComponent({
 
 
 <style scoped>
-.product-detail-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: relative;
-}
 
 .edit-button {
   position: absolute;

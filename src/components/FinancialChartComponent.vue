@@ -183,6 +183,8 @@ export default defineComponent({
     const showMA10 = ref(false)
     const showMA50 = ref(false)
 
+    const isMobile = computed(() => window.innerWidth <= 768)
+
     const fetchCryptoDataDebounced = debounce(
       (params: FetchCryptoDataParams) => fetchCryptoData(params),
       300
@@ -201,7 +203,7 @@ export default defineComponent({
       const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
 
       if (timeFormat === 'max') {
-        return format(utcDate, 'MM/dd/yyyy');
+        return format(utcDate, 'MM/dd/yy');
       }
 
       return format(utcDate, 'MM/dd')
@@ -620,8 +622,8 @@ export default defineComponent({
             borderWidth: 1,
             borderDash: [5, 5],
             label: {
-              display: true,
-              content: new Date(date).toLocaleDateString(),
+              display: !isMobile.value,
+              content: format(new Date(date).toLocaleDateString(), 'MM/dd/yy'),
               position: 'start'
             }
           };

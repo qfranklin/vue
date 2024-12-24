@@ -3,7 +3,7 @@
     <h1>Users</h1>
     <div v-if="loading" class="loading">Loading...</div>
     <div v-else>
-      <div v-for="user in users" :key="user.id" class="user-card">
+      <div v-for="user in users" :key="user.id" class="user-card" @click="viewUserDetails(user.id)">
         <p><strong>Name:</strong> {{ user.name }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
         <p><strong>Birthday:</strong> {{ user.birthday }}</p>
@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from '@/axiosConfig'
 
 interface User {
@@ -28,6 +29,7 @@ export default defineComponent({
   setup() {
     const users = ref<User[]>([])
     const loading = ref(true)
+    const router = useRouter()
 
     const fetchUsers = async () => {
       try {
@@ -40,13 +42,18 @@ export default defineComponent({
       }
     }
 
+    const viewUserDetails = (userId: number) => {
+      router.push(`/user-details/${userId}`)
+    }
+
     onMounted(() => {
       fetchUsers()
     })
 
     return {
       users,
-      loading
+      loading,
+      viewUserDetails
     }
   }
 })
@@ -70,5 +77,6 @@ export default defineComponent({
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 15px;
+  cursor: pointer;
 }
 </style>

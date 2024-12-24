@@ -21,13 +21,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'UserDetailsComponent',
-  setup() {
+  props: {
+    userId: {
+      type: Number,
+      required: true
+    }
+  },
+  setup(props) {
     const userStore = useUserStore()
     const name = ref('')
     const email = ref('')
@@ -37,39 +43,49 @@ export default defineComponent({
 
     const fetchUserDetails = async () => {
       try {
-        const response = await axios.get('/api/user')
+        if (userStore.userId !== props.userId && !userStore.isAdmin) {
+          throw new Error('Unauthorized')
+        }
+
+        const response = await axios.get(`/api/user/${props.userId}`)
         if (response.status === 200) {
           const user = response.data
           name.value = user.name
           email.value = user.email
           birthday.value = user.birthday.split('T')[0]
         } else {
-          throw new Error('Failed to fetch user details.')
+          throw new Error('Some required fields are missing.')
         }
-      } catch {
-        errorMessage.value = 'Failed to fetch user details. Please try again later.'
+      } catch (error) {
+        if ((error as Error).message === 'Unauthorized') {
+          errorMessage.value = 'You are not authorized to view this user\'s details.'
+        } else {
+          errorMessage.value = (error as Error).message
+        }
       }
     }
 
-    onMounted(() => {
+    watch(() => props.userId, () => {
       fetchUserDetails()
     })
 
     const updateProfile = async () => {
       try {
-        const response = await axios.post('/api/user/update', {
+        const response = await axios.post(`/api/user/update/${props.userId}`, {
           name: name.value,
           email: email.value,
           birthday: birthday.value
         })
 
         if (response.status === 200) {
-          userStore.name = name.value
-          userStore.email = email.value
-          userStore.birthday = birthday.value
-          userStore.setBirthday(birthday.value)
-          localStorage.setItem('user_name', name.value)
-          localStorage.setItem('user_email', email.value)
+          if (userStore.userId === props.userId) {
+            userStore.name = name.value
+            userStore.email = email.value
+            userStore.birthday = birthday.value
+            userStore.setBirthday(birthday.value)
+            localStorage.setItem('user_name', name.value)
+            localStorage.setItem('user_email', email.value)
+          }
           successMessage.value = 'Profile updated successfully.'
           errorMessage.value = ''
         } else {

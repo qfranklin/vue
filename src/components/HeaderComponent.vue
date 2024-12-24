@@ -11,7 +11,7 @@
       <div v-if="isLoggedIn" class="dropdown">
         <span class="user-name">{{ firstName }}</span>
         <div class="dropdown-content">
-          <router-link to="/user-details">My Page</router-link>
+          <router-link :to="`/user-details/${userId}`">My Page</router-link>
           <hr />
           <button @click="logout">Logout</button>
         </div>
@@ -33,18 +33,18 @@ export default defineComponent({
     const isLoggedIn = computed(() => userStore.isLoggedIn)
     const firstName = computed(() => userStore.name.split(' ')[0])
     const isAdmin = computed(() => userStore.isAdmin)
+    const userId = computed(() => userStore.userId)
 
     const logout = () => {
       userStore.logout()
-      if (router.currentRoute.value.path === '/admin') {
-        router.push('/login')
-      }
+      router.push('/login')
     }
 
     return {
       isLoggedIn,
       firstName,
       isAdmin,
+      userId,
       logout
     }
   }

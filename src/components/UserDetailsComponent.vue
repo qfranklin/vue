@@ -78,12 +78,14 @@ export default defineComponent({
         })
 
         if (response.status === 200) {
-          userStore.name = name.value
-          userStore.email = email.value
-          userStore.birthday = birthday.value
-          userStore.setBirthday(birthday.value)
-          localStorage.setItem('user_name', name.value)
-          localStorage.setItem('user_email', email.value)
+          if (userStore.userId === props.userId) {
+            userStore.name = name.value
+            userStore.email = email.value
+            userStore.birthday = birthday.value
+            userStore.setBirthday(birthday.value)
+            localStorage.setItem('user_name', name.value)
+            localStorage.setItem('user_email', email.value)
+          }
           successMessage.value = 'Profile updated successfully.'
           errorMessage.value = ''
         } else {

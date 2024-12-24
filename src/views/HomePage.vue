@@ -2,7 +2,6 @@
   <section>
     <div v-if="isLoggedIn">
       <NotesComponent />
-      <LifepathComponent />
     </div>
     <FinancialChartComponent />
   </section>
@@ -12,15 +11,13 @@
 import { defineComponent, computed } from 'vue'
 import NotesComponent from '@/components/NotesComponent.vue'
 import FinancialChartComponent from '@/components/FinancialChartComponent.vue'
-import LifepathComponent from '@/components/LifepathComponent.vue'
 import { useUserStore } from '@/stores/user'
 
 export default defineComponent({
   name: 'HomePage',
   components: {
     NotesComponent,
-    FinancialChartComponent,
-    LifepathComponent
+    FinancialChartComponent
   },
   setup() {
     const userStore = useUserStore()

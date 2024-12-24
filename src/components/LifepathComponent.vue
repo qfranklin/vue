@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue'
+import { defineComponent, ref, computed, onMounted, watch } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
@@ -39,7 +39,13 @@ export interface Lifepath {
 
 export default defineComponent({
   name: 'LifepathComponent',
-  setup() {
+  props: {
+    userId: {
+      type: Number,
+      required: true
+    }
+  },
+  setup(props) {
     const userStore = useUserStore()
     const loading = ref(true)
     const dailyCompatibility = ref('')
@@ -52,20 +58,37 @@ export default defineComponent({
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('/api/user')
-        dailyCompatibility.value = response.data.numerology.daily_compatibility
-        dailyCompatibilityMessage.value = `Today is a ${dailyCompatibility.value} day for you.`
-        lifePathNumber.value = response.data.numerology.life_path_number
-        universalDayNumber.value = response.data.numerology.universal_day_number
-        personalDayNumber.value = response.data.numerology.personal_day_number
+        if (userStore.userId !== props.userId && !userStore.isAdmin) {
+          throw new Error('Unauthorized')
+        }
+
+        const response = await axios.get(`/api/user/${props.userId}`)
+        if (response.status === 200) {
+          const user = response.data
+          dailyCompatibility.value = user.numerology.daily_compatibility
+          dailyCompatibilityMessage.value = `Today is a ${dailyCompatibility.value} day for you.`
+          lifePathNumber.value = user.numerology.life_path_number
+          universalDayNumber.value = user.numerology.universal_day_number
+          personalDayNumber.value = user.numerology.personal_day_number
+        } else {
+          throw new Error('Failed to fetch user data.')
+        }
       } catch (error) {
-        console.error('Failed to fetch user data:', error)
+        if ((error as Error).message === 'Unauthorized') {
+          console.error('You are not authorized to view this user\'s details.')
+        } else {
+          console.error('Failed to fetch user data:', error)
+        }
       } finally {
         loading.value = false
       }
     }
 
     onMounted(() => {
+      fetchUserData()
+    })
+
+    watch(() => props.userId, () => {
       fetchUserData()
     })
 

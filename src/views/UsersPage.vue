@@ -6,7 +6,7 @@
       <div v-for="user in users" :key="user.id" class="user-card" @click="viewUserDetails(user.id)">
         <p><strong>Name:</strong> {{ user.name }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Birthday:</strong> {{ user.birthday }}</p>
+        <p><strong>Birthday:</strong> {{ formatBirthday(user.birthday) }}</p>
       </div>
     </div>
   </div>
@@ -46,6 +46,11 @@ export default defineComponent({
       router.push(`/user-details/${userId}`)
     }
 
+    const formatBirthday = (birthday: string) => {
+      const date = new Date(birthday)
+      return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    }
+
     onMounted(() => {
       fetchUsers()
     })
@@ -53,7 +58,8 @@ export default defineComponent({
     return {
       users,
       loading,
-      viewUserDetails
+      viewUserDetails,
+      formatBirthday
     }
   }
 })

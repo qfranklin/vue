@@ -53,7 +53,7 @@ export default defineComponent({
   components: { VueCal },
   setup() {
     const notes = ref<Event[]>([])
-    const selectedNotes = ref<Note[]>([])
+    const selectedNotes = ref<Event[]>([])
     const selectedDate = ref(new Date().toISOString().split('T')[0])
     const showAddNote = ref(false)
     const newNoteContent = ref('')

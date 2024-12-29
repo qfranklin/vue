@@ -71,7 +71,7 @@ export default defineComponent({
 
     const updateProfile = async () => {
       try {
-        const response = await axios.post(`/api/user/update/${props.userId}`, {
+        const response = await axios.put(`/api/user/update/${props.userId}`, {
           name: name.value,
           email: email.value,
           birthday: birthday.value

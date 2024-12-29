@@ -10,6 +10,7 @@
       style="width: 170px;height: 300px"
       :events="notes"
       @cell-click="handleCellClick"
+      @view-change="handleViewChange"
     />
     <div class="notes-card">
       <div class="notes-header">
@@ -58,8 +59,8 @@ export default defineComponent({
     const showAddNote = ref(false)
     const newNoteContent = ref('')
 
-    const getMonthRange = () => {
-      const start = new Date()
+    const getMonthRange = (date: Date) => {
+      const start = new Date(date)
       start.setDate(1)
       const end = new Date(start)
       end.setMonth(end.getMonth() + 1)
@@ -89,6 +90,11 @@ export default defineComponent({
       selectedDate.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
       console.log('selectedDate:', selectedDate.value)
       filterNotesForSelectedDate()
+    }
+
+    const handleViewChange = (view: { startDate: Date }) => {
+      const { start, end } = getMonthRange(view.startDate)
+      fetchNotes(start.toISOString().split('T')[0], end.toISOString().split('T')[0])
     }
 
     const addNote = async ({ start }: { start: Date }) => {
@@ -149,7 +155,7 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      const { start, end } = getMonthRange()
+      const { start, end } = getMonthRange(new Date())
       fetchNotes(start.toISOString().split('T')[0], end.toISOString().split('T')[0])
     })
 
@@ -160,6 +166,7 @@ export default defineComponent({
       showAddNote,
       newNoteContent,
       handleCellClick,
+      handleViewChange,
       addNote,
       submitNote,
       formatDate,

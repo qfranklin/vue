@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="calendar-container">
     <vue-cal
       class="vuecal--rounded-theme vuecal--blue-theme"
       xsmall
@@ -7,14 +7,23 @@
       :time="false"
       active-view="month"
       :disable-views="['week']"
-      style="width: 270px;height: 300px"
+      style="width: 170px;height: 300px"
       :events="notes"
       @cell-click="handleCellClick"
     />
-    <div class="notes-list">
-      <div v-for="(notes, date) in groupedNotes" :key="date" class="note-group">
-        <small class="note-date">{{ formatDate(date) }}</small>
-        <div v-for="note in notes" :key="note.start" class="note">
+    <div class="notes-card">
+      <div class="notes-header">
+        <a href="#" @click.prevent="showAddNote = true">Add notes</a>
+      </div>
+      <div v-if="showAddNote" class="add-note">
+        <textarea v-model="newNoteContent" placeholder="Enter note content"></textarea>
+        <a href="#" @click.prevent="submitNote">Submit</a>
+      </div>
+      <div v-if="selectedNotes.length === 0" class="no-notes">
+        <p><i>No notes</i></p>
+      </div>
+      <div v-else>
+        <div v-for="note in selectedNotes" :key="note.start" class="note">
           <p>{{ note.title }}</p>
         </div>
       </div>
@@ -44,6 +53,10 @@ export default defineComponent({
   components: { VueCal },
   setup() {
     const notes = ref<Event[]>([])
+    const selectedNotes = ref<Note[]>([])
+    const selectedDate = ref(new Date().toISOString().split('T')[0])
+    const showAddNote = ref(false)
+    const newNoteContent = ref('')
 
     const getMonthRange = () => {
       const start = new Date()
@@ -62,17 +75,23 @@ export default defineComponent({
           end: note.date,
           title: note.content
         }))
+        filterNotesForSelectedDate()
       } catch (error) {
         console.error('Failed to fetch notes:', error)
       }
     }
 
+    const filterNotesForSelectedDate = () => {
+      selectedNotes.value = notes.value.filter(note => note.start === selectedDate.value)
+    }
+
     const handleCellClick = (date: Date) => {
-      addNote({ start: date })
+      selectedDate.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
+      console.log('selectedDate:', selectedDate.value)
+      filterNotesForSelectedDate()
     }
 
     const addNote = async ({ start }: { start: Date }) => {
-      console.log('start:', start)
 
       const content = prompt('Enter note content:')
       if (content) {
@@ -85,6 +104,25 @@ export default defineComponent({
             end: response.data.date,
             title: response.data.content
           })
+          filterNotesForSelectedDate()
+        } catch (error) {
+          console.error('Failed to add note:', error)
+        }
+      }
+    }
+
+    const submitNote = async () => {
+      if (newNoteContent.value) {
+        try {
+          const response = await axios.post('/api/notes', { content: newNoteContent.value, date: selectedDate.value })
+          notes.value.push({
+            start: response.data.date,
+            end: response.data.date,
+            title: response.data.content
+          })
+          filterNotesForSelectedDate()
+          newNoteContent.value = ''
+          showAddNote.value = false
         } catch (error) {
           console.error('Failed to add note:', error)
         }
@@ -117,7 +155,13 @@ export default defineComponent({
 
     return {
       notes,
+      selectedNotes,
+      selectedDate,
+      showAddNote,
+      newNoteContent,
       handleCellClick,
+      addNote,
+      submitNote,
       formatDate,
       groupedNotes
     }
@@ -126,19 +170,47 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.notes-list {
+.calendar-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-card {
   margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 100%;
 }
 
-.note-group {
-  margin-bottom: 1rem;
+.notes-card a {
+  font-size: 0.875rem;
 }
 
-.note-date {
-  color: #888;
+.notes-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-.note {
-  margin-left: 1rem;
+.add-note {
+  margin-top: 10px;
+}
+
+.add-note textarea {
+  width: 100%;
+  height: 60px;
+}
+
+@media (min-width: 768px) {
+  .calendar-container {
+    flex-direction: row;
+  }
+
+  .notes-card {
+    margin-left: 20px;
+    margin-top: 0;
+    width: 300px;
+  }
 }
 </style>

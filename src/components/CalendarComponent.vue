@@ -7,7 +7,7 @@
       :time="false"
       active-view="month"
       :disable-views="['week']"
-      style="width: 170px;height: 300px"
+      style="height: 300px"
       :events="notes"
       @cell-click="handleCellClick"
       @view-change="handleViewChange"
@@ -227,7 +227,6 @@ export default defineComponent({
   .notes-card {
     margin-left: 20px;
     margin-top: 0;
-    width: 300px;
   }
 }
 </style>

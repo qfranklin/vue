@@ -135,14 +135,6 @@ export default defineComponent({
       }
     }
 
-    const formatDate = (date: string) => {
-      const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
-      const formattedDate = new Date(date).toLocaleDateString(undefined, options)
-      const day = new Date(date).getDate()
-      const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th'
-      return formattedDate.replace(/\d+/, day + suffix)
-    }
-
     const groupedNotes = computed(() => {
       return notes.value.reduce((acc: Record<string, Event[]>, note) => {
         const date = note.start.split('T')[0]
@@ -155,9 +147,9 @@ export default defineComponent({
     })
 
     const formattedSelectedDate = computed(() => {
-      const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+      const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', timeZone: 'UTC' }
       const formattedDate = new Date(selectedDate.value).toLocaleDateString(undefined, options)
-      const day = new Date(selectedDate.value).getDate()
+      const day = new Date(selectedDate.value).getUTCDate()
       const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th'
       return formattedDate.replace(/\d+/, day + suffix)
     })
@@ -177,7 +169,6 @@ export default defineComponent({
       handleViewChange,
       addNote,
       submitNote,
-      formatDate,
       groupedNotes,
       formattedSelectedDate
     }

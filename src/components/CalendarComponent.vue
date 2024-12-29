@@ -14,6 +14,7 @@
     />
     <div class="notes-card">
       <div class="notes-header">
+        <span>{{ formattedSelectedDate }}</span>
         <a href="#" @click.prevent="showAddNote = true">Add notes</a>
       </div>
       <div v-if="showAddNote" class="add-note">
@@ -24,7 +25,7 @@
         <p><i>No notes</i></p>
       </div>
       <div v-else>
-        <div v-for="note in selectedNotes" :key="note.start" class="note">
+        <div v-for="(note, index) in selectedNotes" :key="note.start + '-' + index" class="note">
           <p>{{ note.title }}</p>
         </div>
       </div>
@@ -88,7 +89,6 @@ export default defineComponent({
 
     const handleCellClick = (date: Date) => {
       selectedDate.value = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().split('T')[0]
-      console.log('selectedDate:', selectedDate.value)
       filterNotesForSelectedDate()
     }
 
@@ -103,7 +103,7 @@ export default defineComponent({
       if (content) {
         try {
           console.log('content:', content)
-          const formattedDate = start.toISOString().split('T')[0] // Format the date to 'YYYY-MM-DD'
+          const formattedDate = start.toISOString().split('T')[0]
           const response = await axios.post('/api/notes', { content, date: formattedDate })
           notes.value.push({
             start: response.data.date,
@@ -154,6 +154,14 @@ export default defineComponent({
       }, {})
     })
 
+    const formattedSelectedDate = computed(() => {
+      const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' }
+      const formattedDate = new Date(selectedDate.value).toLocaleDateString(undefined, options)
+      const day = new Date(selectedDate.value).getDate()
+      const suffix = day % 10 === 1 && day !== 11 ? 'st' : day % 10 === 2 && day !== 12 ? 'nd' : day % 10 === 3 && day !== 13 ? 'rd' : 'th'
+      return formattedDate.replace(/\d+/, day + suffix)
+    })
+
     onMounted(() => {
       const { start, end } = getMonthRange(new Date())
       fetchNotes(start.toISOString().split('T')[0], end.toISOString().split('T')[0])
@@ -170,7 +178,8 @@ export default defineComponent({
       addNote,
       submitNote,
       formatDate,
-      groupedNotes
+      groupedNotes,
+      formattedSelectedDate
     }
   }
 })
@@ -196,8 +205,9 @@ export default defineComponent({
 
 .notes-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
 .add-note {

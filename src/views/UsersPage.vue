@@ -43,7 +43,7 @@ export default defineComponent({
     }
 
     const viewUserDetails = (userId: number) => {
-      router.push(`/user-details/${userId}`)
+      router.push(`/user/${userId}`)
     }
 
     const formatBirthday = (birthday: string) => {

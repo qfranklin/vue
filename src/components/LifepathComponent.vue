@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, watch } from 'vue'
+import { defineComponent, ref, computed, watch } from 'vue'
 import axios from '@/axiosConfig'
 import { useUserStore } from '@/stores/user'
 
@@ -40,8 +40,8 @@ export interface Lifepath {
 export default defineComponent({
   name: 'LifepathComponent',
   props: {
-    userId: {
-      type: Number,
+    identifier: {
+      type: [String, Number],
       required: true
     }
   },
@@ -58,11 +58,8 @@ export default defineComponent({
 
     const fetchUserData = async () => {
       try {
-        if (userStore.userId !== props.userId && !userStore.isAdmin) {
-          throw new Error('Unauthorized')
-        }
 
-        const response = await axios.get(`/api/user/${props.userId}`)
+        const response = await axios.get(`/api/user/${props.identifier}`)
         if (response.status === 200) {
           const user = response.data
           dailyCompatibility.value = user.numerology.daily_compatibility
@@ -84,11 +81,7 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => {
-      fetchUserData()
-    })
-
-    watch(() => props.userId, () => {
+    watch(() => props.identifier, () => {
       fetchUserData()
     })
 

@@ -1,6 +1,6 @@
 <template>
   <UserDetailsComponent :identifier="identifier" />
-  <LifepathComponent :userId="userId" />
+  <LifepathComponent :identifier="identifier" />
   <CalendarComponent />
 </template>
 

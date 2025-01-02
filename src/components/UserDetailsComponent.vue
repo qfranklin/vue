@@ -52,7 +52,6 @@ export default defineComponent({
         const response = await axios.get(`/api/user/${props.identifier}`)
         if (response.status === 200) {
           const user = response.data
-          console.log(user)
           userId.value = user.id
           name.value = user.name
           email.value = user.email
@@ -80,7 +79,7 @@ export default defineComponent({
         })
 
         if (response.status === 200) {
-          if (userStore.userId === userId.value) {
+          if (userStore.userId === Number(userId.value)) {
             userStore.name = name.value
             userStore.email = email.value
             userStore.birthday = birthday.value

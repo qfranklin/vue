@@ -11,7 +11,7 @@
       <div v-if="isLoggedIn" class="dropdown">
         <span class="user-name">{{ firstName }}</span>
         <div class="dropdown-content">
-          <router-link :to="`/user-details/${userId}`">My Page</router-link>
+          <router-link :to="`/user/${userId}`">My Page</router-link>
           <hr />
           <button @click="logout">Logout</button>
         </div>

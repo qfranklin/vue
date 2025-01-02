@@ -55,7 +55,7 @@ const routes = [
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
-    path: '/user-details/:id',
+    path: '/user/:identifier',
     name: 'UserDetails',
     component: UserDetailsPage,
     meta: { requiresAuth: true }

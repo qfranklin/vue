@@ -28,8 +28,8 @@ import { useUserStore } from '@/stores/user'
 export default defineComponent({
   name: 'UserDetailsComponent',
   props: {
-    userId: {
-      type: Number,
+    identifier: {
+      type: [String, Number],
       required: true
     }
   },
@@ -43,11 +43,7 @@ export default defineComponent({
 
     const fetchUserDetails = async () => {
       try {
-        if (userStore.userId !== props.userId && !userStore.isAdmin) {
-          throw new Error('Unauthorized')
-        }
-
-        const response = await axios.get(`/api/user/${props.userId}`)
+        const response = await axios.get(`/api/user/${props.identifier}`)
         if (response.status === 200) {
           const user = response.data
           name.value = user.name
@@ -57,28 +53,24 @@ export default defineComponent({
           throw new Error('Some required fields are missing.')
         }
       } catch (error) {
-        if ((error as Error).message === 'Unauthorized') {
-          errorMessage.value = 'You are not authorized to view this user\'s details.'
-        } else {
-          errorMessage.value = (error as Error).message
-        }
+        errorMessage.value = (error as Error).message
       }
     }
 
-    watch(() => props.userId, () => {
+    watch(() => props.identifier, () => {
       fetchUserDetails()
     })
 
     const updateProfile = async () => {
       try {
-        const response = await axios.put(`/api/user/update/${props.userId}`, {
+        const response = await axios.put(`/api/user/update/${props.identifier}`, {
           name: name.value,
           email: email.value,
           birthday: birthday.value
         })
 
         if (response.status === 200) {
-          if (userStore.userId === props.userId) {
+          if (userStore.userId === props.identifier) {
             userStore.name = name.value
             userStore.email = email.value
             userStore.birthday = birthday.value

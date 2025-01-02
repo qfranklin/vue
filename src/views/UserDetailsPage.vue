@@ -1,5 +1,5 @@
 <template>
-  <UserDetailsComponent :userId="userId" />
+  <UserDetailsComponent :identifier="identifier" />
   <LifepathComponent :userId="userId" />
   <CalendarComponent />
 </template>
@@ -21,17 +21,20 @@ export default defineComponent({
   setup() {
     const route = useRoute()
     const userId = ref<number>(0)
+    const identifier = ref<string | number>('')
 
     onMounted(() => {
       userId.value = parseInt(route.params.id as string, 10) || 0
+      identifier.value = route.params.identifier as string
     })
 
-    watch(() => route.params.id, (newId) => {
-      userId.value = parseInt(newId as string, 10) || 0
+    watch(() => route.params.identifier, (newIdentifier) => {
+      identifier.value = newIdentifier as string
     })
 
     return {
-      userId
+      userId,
+      identifier
     }
   }
 })

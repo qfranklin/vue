@@ -13,6 +13,10 @@
         <label for="birthday">Birthday</label>
         <input type="date" id="birthday" v-model="birthday" required />
       </div>
+      <div class="form-group">
+        <label for="slug">Slug</label>
+        <input type="text" id="slug" v-model="slug" />
+      </div>
       <button type="submit">Save</button>
     </form>
     <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
@@ -35,9 +39,11 @@ export default defineComponent({
   },
   setup(props) {
     const userStore = useUserStore()
+    const userId = ref('')
     const name = ref('')
     const email = ref('')
     const birthday = ref('')
+    const slug = ref('')
     const successMessage = ref('')
     const errorMessage = ref('')
 
@@ -46,9 +52,12 @@ export default defineComponent({
         const response = await axios.get(`/api/user/${props.identifier}`)
         if (response.status === 200) {
           const user = response.data
+          console.log(user)
+          userId.value = user.id
           name.value = user.name
           email.value = user.email
           birthday.value = user.birthday.split('T')[0]
+          slug.value = user.slug
         } else {
           throw new Error('Some required fields are missing.')
         }
@@ -63,14 +72,15 @@ export default defineComponent({
 
     const updateProfile = async () => {
       try {
-        const response = await axios.put(`/api/user/update/${props.identifier}`, {
+        const response = await axios.put(`/api/user/update/${userId.value}`, {
           name: name.value,
           email: email.value,
-          birthday: birthday.value
+          birthday: birthday.value,
+          slug: slug.value
         })
 
         if (response.status === 200) {
-          if (userStore.userId === props.identifier) {
+          if (userStore.userId === userId.value) {
             userStore.name = name.value
             userStore.email = email.value
             userStore.birthday = birthday.value
@@ -93,6 +103,7 @@ export default defineComponent({
       name,
       email,
       birthday,
+      slug,
       updateProfile,
       successMessage,
       errorMessage

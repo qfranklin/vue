@@ -1,80 +1,88 @@
 <template>
-  <div>
-    <h1>Register Page</h1>
+  <div class="register-page">
     <form @submit.prevent="handleRegister">
-      <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name" v-model="name" required>
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" v-model="name" required />
       </div>
-      <div>
-        <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" v-model="email" required />
       </div>
-      <div>
-        <label for="password_confirmation">Confirm Password:</label>
-        <input type="password" id="password_confirmation" v-model="passwordConfirmation" required>
+      <div class="form-group">
+        <label for="birthday">Birthday</label>
+        <input type="date" id="birthday" v-model="birthday" required />
       </div>
-      <div>
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" v-model="password" required />
       </div>
-      <div>
-        <label for="birthday">birthday:</label>
-        <input type="date" id="birthday" v-model="birthday" required>
+      <div class="form-group">
+        <label for="passwordConfirmation">Confirm Password</label>
+        <input type="password" id="passwordConfirmation" v-model="passwordConfirmation" required />
+      </div>
+      <div class="form-group">
+        <input type="checkbox" id="emailConsent" v-model="emailConsent" required />
+        <label for="emailConsent">I agree to receive emails for password resets and other notifications.</label>
       </div>
       <button type="submit">Register</button>
     </form>
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-    <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
+    <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import axios from 'axios'
+import axios from '@/axiosConfig'
 
 export default defineComponent({
   name: 'RegisterPage',
   setup() {
     const name = ref('')
-    const password = ref('')
-    const passwordConfirmation = ref('')
     const email = ref('')
     const birthday = ref('')
+    const password = ref('')
+    const passwordConfirmation = ref('')
+    const emailConsent = ref(false)
     const errorMessage = ref('')
     const successMessage = ref('')
 
     const handleRegister = async () => {
+      if (password.value !== passwordConfirmation.value) {
+        errorMessage.value = 'Passwords do not match.'
+        return
+      }
+
       try {
         const response = await axios.post('/api/register', {
           name: name.value,
+          email: email.value,
+          birthday: birthday.value,
           password: password.value,
           password_confirmation: passwordConfirmation.value,
-          email: email.value,
-          birthday: birthday.value
+          emailConsent: emailConsent.value
         })
-        console.log('Registration successful:', response.data)
-        successMessage.value = 'Registration successful!'
-        errorMessage.value = ''
-        // Clear form fields
-        name.value = ''
-        password.value = ''
-        passwordConfirmation.value = ''
-        email.value = ''
-        birthday.value = ''
+
+        if (response.status === 201) {
+          successMessage.value = 'Registration successful. Please check your email for verification.'
+          errorMessage.value = ''
+        } else {
+          throw new Error('Registration failed.')
+        }
       } catch (error) {
-        console.error('Registration failed:', error)
-        errorMessage.value = 'Registration failed. Please try again.'
+        errorMessage.value = (error as Error).message
         successMessage.value = ''
       }
     }
 
     return {
       name,
-      password,
-      passwordConfirmation,
       email,
       birthday,
+      password,
+      passwordConfirmation,
+      emailConsent,
       errorMessage,
       successMessage,
       handleRegister
@@ -84,7 +92,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 form {
   display: flex;
   flex-direction: column;
@@ -104,15 +111,15 @@ button {
   cursor: pointer;
 }
 
-.error-message {
-  color: red;
-  margin-top: 1rem;
-  text-align: center;
+button:hover {
+  background-color: #0056b3;
 }
 
 .success-message {
   color: green;
-  margin-top: 1rem;
-  text-align: center;
+}
+
+.error-message {
+  color: red;
 }
 </style>

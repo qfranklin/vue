@@ -60,10 +60,11 @@ export default defineComponent({
           email: email.value,
           birthday: birthday.value,
           password: password.value,
+          password_confirmation: passwordConfirmation.value,
           emailConsent: emailConsent.value
         })
 
-        if (response.status === 200) {
+        if (response.status === 201) {
           successMessage.value = 'Registration successful. Please check your email for verification.'
           errorMessage.value = ''
         } else {

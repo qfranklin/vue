@@ -1,17 +1,21 @@
 <!-- src/views/Login.vue -->
 <template>
-  <form @submit.prevent="handleLogin">
-    <div>
-      <label for="email">Email:</label>
-      <input type="email" id="email" v-model="email" required>
-    </div>
-    <div>
-      <label for="password">Password:</label>
-      <input type="password" id="password" v-model="password" required>
-    </div>
-    <button type="submit">Login</button>
-  </form>
-  <p v-if="errorMessage">{{ errorMessage }}</p>
+  <div>
+    <form @submit.prevent="handleLogin">
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" v-model="email" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" v-model="password" required>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+    <button @click="handlePasswordReset">Forgot Password?</button>
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+    <p v-if="successMessage">{{ successMessage }}</p>
+  </div>
 </template>
 
 <script lang="ts">
@@ -26,6 +30,7 @@ export default defineComponent({
     const email = ref('')
     const password = ref('')
     const errorMessage = ref('')
+    const successMessage = ref('')
     const router = useRouter()
     const userStore = useUserStore()
 
@@ -45,11 +50,30 @@ export default defineComponent({
       }
     }
 
+    const handlePasswordReset = async () => {
+      try {
+        const response = await axios.post('/api/password/email', {
+          email: email.value
+        })
+        if (response.status === 200) {
+          successMessage.value = 'Password reset email sent. Please check your inbox.'
+          errorMessage.value = ''
+        } else {
+          throw new Error('Failed to send password reset email.')
+        }
+      } catch (error) {
+        errorMessage.value = (error as Error).message
+        successMessage.value = ''
+      }
+    }
+
     return {
       email,
       password,
       errorMessage,
-      handleLogin
+      successMessage,
+      handleLogin,
+      handlePasswordReset
     }
   }
 })
@@ -73,5 +97,17 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.success-message {
+  color: green;
+}
+
+.error-message {
+  color: red;
 }
 </style>

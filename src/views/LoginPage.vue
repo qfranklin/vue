@@ -1,6 +1,6 @@
 <!-- src/views/Login.vue -->
 <template>
-  <div>
+  <div class="login-page">
     <form @submit.prevent="handleLogin">
       <div>
         <label for="email">Email:</label>
@@ -10,11 +10,13 @@
         <label for="password">Password:</label>
         <input type="password" id="password" v-model="password" required>
       </div>
-      <button type="submit">Login</button>
+      <div class="form-actions">
+        <button type="submit" class="login-button">Login</button>
+        <button type="button" class="password-reset-button" @click="handlePasswordReset">Forgot Password?</button>
+      </div>
     </form>
-    <button @click="handlePasswordReset">Forgot Password?</button>
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-    <p v-if="successMessage">{{ successMessage }}</p>
+    <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
   </div>
 </template>
 
@@ -80,27 +82,49 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.login-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 300px;
+  margin: auto;
+}
+
 form {
   display: flex;
   flex-direction: column;
-  max-width: 300px;
-  margin: auto;
+  width: 100%;
 }
 
 div {
   margin-bottom: 1rem;
 }
 
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
 button {
-  padding: 0.5rem;
-  background-color: #007bff;
-  color: white;
+  background: none;
   border: none;
+  color: #007bff;
   cursor: pointer;
+  text-decoration: underline;
+  font-size: 1rem;
 }
 
 button:hover {
-  background-color: #0056b3;
+  color: #0056b3;
+}
+
+.login-button {
+  align-self: flex-start;
+}
+
+.password-reset-button {
+  align-self: flex-end;
+  font-size: 0.875rem;
 }
 
 .success-message {

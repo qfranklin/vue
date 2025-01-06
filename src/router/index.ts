@@ -8,6 +8,7 @@ import ProductDetailPage from '../views/ProductDetailPage.vue'
 import AddProductPage from '../views/AddProductPage.vue'
 import UsersPage from '../views/UsersPage.vue'
 import UserDetailsPage from '../views/UserDetailsPage.vue'
+import PasswordResetPage from '@/views/PasswordResetPage.vue'
 import { useUserStore } from '@/stores/user'
 
 const routes = [
@@ -59,6 +60,11 @@ const routes = [
     name: 'UserDetails',
     component: UserDetailsPage,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/password/reset/:token',
+    name: 'PasswordReset',
+    component: PasswordResetPage
   }
 ]
 

@@ -1,21 +1,20 @@
 <template>
-  <button v-if="!isEditing" @click="toggleEditMode" class="edit-button">✏️</button>
 
   <div v-if="product.images && product.images.length" class="product-images">
     <div v-for="(image, index) in product.images" :key="index" class="product-image">
       <img :src="getImageUrl(image)" alt="Product Image" />
-      <button v-if="isEditing" @click="removeImage(index)" class="delete-image-button">🗑️</button>
+      <button v-if="isAdmin" @click="removeImage(index)" class="delete-image-button">🗑️</button>
     </div>
   </div>
 
-  <div v-if="isEditing" class="upload-new-image">
-    <input type="file" @change="handleImageUpload" multiple />
+  <div v-if="isAdmin" class="upload-new-image">
+    <input type="file" @change="handleImageUpload" accept=".jpeg,.png,.jpg" multiple />
   </div>
-  <p class="product-price" v-if="!isEditing">Price: ${{ product.price }}</p>
-  <input v-if="isEditing" type="text" v-model="product.price" class="edit-input" placeholder="Price" />
-  <p class="product-description" v-if="!isEditing">{{ product.description }}</p>
-  <textarea v-if="isEditing" v-model="product.description" class="edit-textarea" placeholder="Description"></textarea>
-  <div v-if="isEditing" class="edit-actions">
+  <p class="product-price" v-if="!isAdmin">Price: ${{ product.price }}</p>
+  <input v-if="isAdmin" type="text" v-model="product.price" class="edit-input" placeholder="Price" />
+  <p class="product-description" v-if="!isAdmin">{{ product.description }}</p>
+  <textarea v-if="isAdmin" v-model="product.description" class="edit-textarea" placeholder="Description"></textarea>
+  <div v-if="isAdmin" class="edit-actions">
     <a @click="saveChanges" class="save-link">Save</a>
   </div>
 </template>
@@ -33,7 +32,6 @@ export default defineComponent({
     const product = ref({ id: 0, description: '', images: [], price: '' })
     const userStore = useUserStore()
     const isAdmin = ref(userStore.isAdmin)
-    const isEditing = ref(false)
     const newImages = ref<File[]>([])
     const deletedImages = ref<string[]>([])
 
@@ -51,10 +49,6 @@ export default defineComponent({
         ? 'https://qfranklin.xyz/storage'
         : 'http://127.0.0.1:8082/storage'
       return `${baseUrl}/${imagePath}`
-    }
-
-    const toggleEditMode = () => {
-      isEditing.value = !isEditing.value
     }
 
     const handleImageUpload = (event: Event) => {
@@ -91,7 +85,6 @@ export default defineComponent({
             'Content-Type': 'multipart/form-data',
           },
         })
-        isEditing.value = false
         newImages.value = []
       } catch (error) {
         console.error('Failed to update product:', error)
@@ -106,8 +99,6 @@ export default defineComponent({
     return {
       product,
       isAdmin,
-      isEditing,
-      toggleEditMode,
       handleImageUpload,
       removeImage,
       saveChanges,

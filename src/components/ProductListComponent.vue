@@ -1,9 +1,10 @@
 <template>
   <a v-if="isAdmin" @click="addProduct" class="add-product-link">Add Product</a>
   <div class="product-list">
-    <div v-for="product in products" :key="product.id" class="product-card" @click="viewProduct(product.id)">
-      <div class="product-image" v-if="product.images && product.images.length">
+    <div v-for="product in products" :key="product.id" class="product-card">
+      <div class="product-image" v-if="product.images && product.images.length" @click="viewProduct(product.id)">
         <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
+        <button v-if="isAdmin" @click.stop="deleteProduct(product.id)" class="delete-product-button">🗑️</button>
       </div>
       <div class="product-details">
         <p class="product-price">${{ product.price }}</p>
@@ -58,11 +59,20 @@ export default defineComponent({
       router.push(`/products/${productId}`)
     }
 
+    const deleteProduct = async (productId: number) => {
+      try {
+        await axios.delete(`/api/products/${productId}`)
+        products.value = products.value.filter(product => product.id !== productId)
+      } catch (error) {
+        console.error('Failed to delete product:', error)
+      }
+    }
+
     onMounted(() => {
       fetchProducts()
     })
 
-    return { products, isAdmin, addProduct, viewProduct, getImageUrl }
+    return { products, isAdmin, addProduct, viewProduct, deleteProduct, getImageUrl }
   }
 })
 </script>
@@ -103,6 +113,10 @@ export default defineComponent({
   transform: scale(1.05);
 }
 
+.product-image {
+  position: relative;
+}
+
 .product-image img {
   width: 100%;
   height: auto;
@@ -111,11 +125,24 @@ export default defineComponent({
 
 .product-details {
   padding: 15px;
+  position: relative;
 }
 
 .product-price {
   font-size: 16px;
   color: #888;
+}
+
+.delete-product-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 16px;
+  display: block;
 }
 
 @media (max-width: 600px) {

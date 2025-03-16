@@ -1,8 +1,7 @@
 <template>
   <header class="header">
     <nav class="left-nav">
-      <router-link to="/">Home</router-link>
-      <router-link to="/products">Glass</router-link>
+      <router-link to="/">Glass</router-link>
       <router-link v-if="isAdmin" to="/users">Users</router-link>
     </nav>
     <nav class="right-nav">

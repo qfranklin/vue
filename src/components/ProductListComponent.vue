@@ -86,8 +86,8 @@ export default defineComponent({
 }
 
 .product-list {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
 }
 
@@ -96,7 +96,6 @@ export default defineComponent({
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
-  width: calc(33.333%);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s;
@@ -121,9 +120,10 @@ export default defineComponent({
   color: #888;
 }
 
-@media (max-width: 768px) {
-  .product-card {
-    width: calc(100%);
+@media (max-width: 600px) {
+  .product-list {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
+
 </style>

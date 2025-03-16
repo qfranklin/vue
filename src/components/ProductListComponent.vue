@@ -4,11 +4,20 @@
     <div v-for="product in products" :key="product.id" class="product-card">
       <div class="product-image" v-if="product.images && product.images.length" @click="viewProduct(product.id)">
         <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
-        <button v-if="isAdmin" @click.stop="deleteProduct(product.id)" class="delete-product-button">🗑️</button>
+        <button v-if="isAdmin" @click.stop="showDeleteModal(product.id)" class="delete-product-button">🗑️</button>
       </div>
       <div class="product-details">
         <p class="product-price">${{ product.price }}</p>
       </div>
+    </div>
+  </div>
+
+  <div v-if="showModal" class="modal">
+    <div class="modal-content">
+      <span class="close" @click="hideDeleteModal">&times;</span>
+      <p>Are you sure you want to delete this product?</p>
+      <button @click="confirmDeleteProduct" class="modal-button">Yes</button>
+      <button @click="hideDeleteModal" class="modal-button">No</button>
     </div>
   </div>
 </template>
@@ -34,6 +43,8 @@ export default defineComponent({
     const products = ref<Product[]>([])
     const userStore = useUserStore()
     const isAdmin = ref(userStore.isAdmin)
+    const showModal = ref(false)
+    const productIdToDelete = ref<number | null>(null)
 
     const fetchProducts = async () => {
       try {
@@ -59,12 +70,25 @@ export default defineComponent({
       router.push(`/products/${productId}`)
     }
 
-    const deleteProduct = async (productId: number) => {
-      try {
-        await axios.delete(`/api/products/${productId}`)
-        products.value = products.value.filter(product => product.id !== productId)
-      } catch (error) {
-        console.error('Failed to delete product:', error)
+    const showDeleteModal = (productId: number) => {
+      productIdToDelete.value = productId
+      showModal.value = true
+    }
+
+    const hideDeleteModal = () => {
+      showModal.value = false
+      productIdToDelete.value = null
+    }
+
+    const confirmDeleteProduct = async () => {
+      if (productIdToDelete.value !== null) {
+        try {
+          await axios.delete(`/api/products/${productIdToDelete.value}`)
+          products.value = products.value.filter(product => product.id !== productIdToDelete.value)
+          hideDeleteModal()
+        } catch (error) {
+          console.error('Failed to delete product:', error)
+        }
       }
     }
 
@@ -72,7 +96,7 @@ export default defineComponent({
       fetchProducts()
     })
 
-    return { products, isAdmin, addProduct, viewProduct, deleteProduct, getImageUrl }
+    return { products, isAdmin, addProduct, viewProduct, showDeleteModal, hideDeleteModal, confirmDeleteProduct, showModal, getImageUrl }
   }
 })
 </script>
@@ -151,4 +175,44 @@ export default defineComponent({
   }
 }
 
+.modal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.modal-button {
+  margin: 0 10px;
+}
 </style>

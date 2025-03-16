@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomePage from '../views/HomePage.vue'
 import LoginPage from '../views/LoginPage.vue'
 import RegisterPage from '../views/RegisterPage.vue'
 import AdminPage from '../views/AdminPage.vue'
@@ -14,8 +13,8 @@ import { useUserStore } from '@/stores/user'
 const routes = [
   {
     path: '/',
-    name: 'HomePage',
-    component: HomePage
+    name: 'Products',
+    component: ProductsPage
   },
   {
     path: '/login',
@@ -32,11 +31,6 @@ const routes = [
     name: 'Admin',
     component: AdminPage,
     meta: { requiresAuth: true, requiresAdmin: true }
-  },
-  {
-    path: '/products',
-    name: 'Products',
-    component: ProductsPage
   },
   {
     path: '/products/:id',

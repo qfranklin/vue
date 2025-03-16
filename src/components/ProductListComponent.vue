@@ -1,14 +1,12 @@
 <template>
-  <div>
-    <a v-if="isAdmin" @click="addProduct" class="add-product-link">Add Product</a>
-    <div class="product-list">
-      <div v-for="product in products" :key="product.id" class="product-card" @click="viewProduct(product.id)">
-        <div class="product-image" v-if="product.images && product.images.length">
-          <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
-        </div>
-        <div class="product-details">
-          <p class="product-price">${{ product.price }}</p>
-        </div>
+  <a v-if="isAdmin" @click="addProduct" class="add-product-link">Add Product</a>
+  <div class="product-list">
+    <div v-for="product in products" :key="product.id" class="product-card" @click="viewProduct(product.id)">
+      <div class="product-image" v-if="product.images && product.images.length">
+        <img v-for="image in product.images" :src="getImageUrl(image)" :key="image" alt="Product Image" />
+      </div>
+      <div class="product-details">
+        <p class="product-price">${{ product.price }}</p>
       </div>
     </div>
   </div>

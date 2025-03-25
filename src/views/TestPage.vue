@@ -4,10 +4,28 @@
     <div v-if="loading">Loading...</div>
     <div v-else>
       <div v-for="(question, index) in questions" :key="index" class="question">
-        <p>{{ question.text }}</p>
+        <p>{{ question.question }}</p>
         <ul>
-          <li v-for="(answer, idx) in question.answers" :key="idx">{{ answer }}</li>
+          <li>
+            <input type="radio" :name="'question' + index" :value="question.option_a" v-model="userAnswers[index]" @change="checkAnswer(index)" />
+            {{ question.option_a }}
+          </li>
+          <li>
+            <input type="radio" :name="'question' + index" :value="question.option_b" v-model="userAnswers[index]" @change="checkAnswer(index)" />
+            {{ question.option_b }}
+          </li>
+          <li>
+            <input type="radio" :name="'question' + index" :value="question.option_c" v-model="userAnswers[index]" @change="checkAnswer(index)" />
+            {{ question.option_c }}
+          </li>
+          <li>
+            <input type="radio" :name="'question' + index" :value="question.option_d" v-model="userAnswers[index]" @change="checkAnswer(index)" />
+            {{ question.option_d }}
+          </li>
         </ul>
+        <p v-if="results[index] !== undefined">
+          {{ results[index] ? 'Correct!' : 'Incorrect. The correct answer is: ' + question.correct_answer }}
+        </p>
       </div>
     </div>
   </div>
@@ -18,8 +36,16 @@ import { defineComponent, ref, onMounted } from 'vue'
 import axios from '@/axiosConfig'
 
 interface Question {
-  text: string;
-  answers: string[];
+  id: number;
+  question: string;
+  question_type: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export default defineComponent({
@@ -27,6 +53,8 @@ export default defineComponent({
   setup() {
     const loading = ref(true)
     const questions = ref<Question[]>([])
+    const userAnswers = ref<string[]>([])
+    const results = ref<boolean[]>([])
 
     onMounted(async () => {
       try {
@@ -39,9 +67,20 @@ export default defineComponent({
       }
     })
 
+    const checkAnswer = (index: number) => {
+      if (userAnswers.value[index] === questions.value[index].correct_answer) {
+        results.value[index] = true
+      } else {
+        results.value[index] = false
+      }
+    }
+
     return {
       questions,
-      loading
+      loading,
+      userAnswers,
+      results,
+      checkAnswer
     }
   }
 })

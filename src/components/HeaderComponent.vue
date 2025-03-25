@@ -3,6 +3,7 @@
     <nav class="left-nav">
       <router-link to="/">Glass</router-link>
       <router-link v-if="isAdmin" to="/users">Users</router-link>
+      <router-link v-if="isLoggedIn" to="/test">Test</router-link>
     </nav>
     <nav class="right-nav">
       <router-link v-if="!isLoggedIn" to="/login">Login</router-link>

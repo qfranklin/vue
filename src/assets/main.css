@@ -7,6 +7,5 @@
 }
 
 body {
-  background-color: #ffffff;
-  color: var(--color-text) !important;
+  background-image: url('/background.png');
 }

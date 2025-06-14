@@ -23,6 +23,5 @@ export default defineComponent({
   padding-left: 2rem;
   padding-right: 2rem;
   padding-bottom: 2rem;
-  background-image: url('/background.png');
 }
 </style>

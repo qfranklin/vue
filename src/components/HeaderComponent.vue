@@ -57,7 +57,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background-color: #f5f5f5;
   width: 100%;
   position: fixed;
   top: 0;

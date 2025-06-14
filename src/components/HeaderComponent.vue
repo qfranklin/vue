@@ -12,7 +12,6 @@
         <span class="user-name">{{ firstName }}</span>
         <div class="dropdown-content">
           <router-link :to="`/user/${userId}`">My Page</router-link>
-          <hr />
           <button @click="logout">Logout</button>
         </div>
       </div>
@@ -62,43 +61,52 @@ export default defineComponent({
   top: 0;
   left: 0;
   z-index: 1000;
+  background: rgba(255, 255, 255, 0.05); /* Translucent background */
+  backdrop-filter: blur(10px); /* Glass effect */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
-.left-nav {
+
+.left-nav, .right-nav {
   display: flex;
   gap: 1rem;
 }
-.right-nav {
-  display: flex;
-  gap: 1rem;
-  margin-left: auto;
-}
+
 nav a {
   text-decoration: none;
-  color: #007bff;
-  cursor: pointer;
+  color: #ffffff;
+  font-size: 1rem;
+  transition: color 0.3s ease;
 }
+
 .user-name {
-  color: #007bff;
+  color: #ffffff;
   cursor: pointer;
 }
+
 .dropdown {
   position: relative;
   display: inline-block;
 }
+
 .dropdown-content {
   display: none;
   position: absolute;
   right: 0;
-  background-color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
+  border-radius: 8px;
 }
+
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
 .dropdown-content a, .dropdown-content button {
-  color: black;
+  color: #ffffff;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -107,13 +115,12 @@ nav a {
   background: none;
   border: none;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
-.dropdown-content hr {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid #ccc;
-}
+
 .dropdown-content a:hover, .dropdown-content button:hover {
-  background-color: #f1f1f1;
+  background-color: rgba(0, 191, 255, 0.2);
+  border-radius: 8px;
 }
+
 </style>

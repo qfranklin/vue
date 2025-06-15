@@ -102,76 +102,105 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .add-product-link {
-  color: #007BFF;
+  color: #ffffff;
   text-decoration: none;
-  font-size: 16px;
-  margin-bottom: 20px;
+  font-size: 12px;
+  margin-bottom: 10px;
   display: inline-block;
   cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 0.5em 1.2em;
+  box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
+  backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.18);
+  transition: background 0.3s, color 0.3s;
 }
 
 .add-product-link:hover {
-  text-decoration: underline;
-  color: #0056b3;
+  background: rgba(0,191,255,0.13);
+  color: #fff;
 }
 
 .product-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 24px;
 }
 
 .product-card {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  background: linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(0,191,255,0.10) 100%);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  border: 1.5px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(14px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.3s;
 }
 
 .product-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
+  box-shadow: 0 12px 40px 0 rgba(0,191,255,0.18);
 }
 
 .product-image {
   position: relative;
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(0,191,255,0.10);
 }
 
 .product-image img {
   width: 100%;
   height: auto;
   display: block;
+  border-radius: 0;
 }
 
 .product-details {
-  padding: 15px;
+  padding: 18px;
   position: relative;
 }
 
 .product-price {
-  font-size: 16px;
-  color: #888;
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0,191,255,0.10);
 }
 
 .delete-product-button {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: none;
+  background: rgba(255,255,255,0.7);
   border: none;
-  color: red;
+  color: #ff3b3b;
   cursor: pointer;
-  font-size: 16px;
-  display: block;
+  font-size: 18px;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(31,38,135,0.10);
+  transition: background 0.2s, color 0.2s;
+  padding: 0.3em 0.5em;
+}
+
+.delete-product-button:hover {
+  background: rgba(255,0,0,0.15);
+  color: #fff;
 }
 
 @media (max-width: 600px) {
   .product-list {
     grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .product-details {
+    padding: 12px;
   }
 }
 
@@ -186,33 +215,57 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  max-width: 500px;
+  background: linear-gradient(120deg, rgba(255,255,255,0.92) 0%, rgba(0,191,255,0.13) 100%);
+  padding: 28px 20px 20px 20px;
+  border: 1.5px solid rgba(0,191,255,0.18);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  width: 90%;
+  max-width: 400px;
   text-align: center;
+  position: relative;
 }
 
 .close {
-  color: #aaa;
-  float: right;
+  color: #00bfff;
+  position: absolute;
+  top: 12px;
+  right: 18px;
   font-size: 28px;
   font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
 .close:hover,
 .close:focus {
-  color: black;
+  color: #ff3b3b;
   text-decoration: none;
-  cursor: pointer;
 }
 
 .modal-button {
   margin: 0 10px;
+  padding: 0.5em 1.5em;
+  border-radius: 12px;
+  border: none;
+  background: rgba(0,191,255,0.13);
+  color: #00bfff;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 2px 8px rgba(31,38,135,0.10);
+}
+
+.modal-button:hover {
+  background: #00bfff;
+  color: #fff;
 }
 </style>
